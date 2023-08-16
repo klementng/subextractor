@@ -13,6 +13,6 @@ SSAstyle:
 
 save:
   # SRT
-  apply_styles: true
+  apply_styles: false
   keep_unknown_html_tags: false
   keep_ssa_tags: true
