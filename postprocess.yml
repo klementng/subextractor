@@ -7,9 +7,9 @@ SSAstyle:
   borderstyle: 1
   outline: 0
   shadow: 2
-  marginl: 20
-  marginr: 20
-  marginv: 20
+  marginl: 30
+  marginr: 30
+  marginv: 30
 
 save:
   # SRT
