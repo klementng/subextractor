@@ -1,8 +1,8 @@
 FROM python:3.10
 
-RUN apt install software-properties-common
-RUN add-apt-repository ppa:alex-p/tesseract-ocr5 && apt update
-RUN apt install mkvtoolnix tesseract-ocr
+RUN apt update && apt install software-properties-common
+RUN add-apt-repository ppa:alex-p/tesseract-ocr5 
+RUN apt update && apt install mkvtoolnix tesseract-ocr
 
 WORKDIR /app
 COPY . .
