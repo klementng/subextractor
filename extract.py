@@ -144,11 +144,13 @@ class BaseSubtitleExtractor:
         ffprobe_info = self.get_subtitle_info(media_path)
 
         lang = ffprobe_info[stream_index]['tags'].get('language','unknown')
-        title = ffprobe_info[stream_index]['tags'].get("title",'untitled')
+        title = ffprobe_info[stream_index]['tags'].get("title",'Untitled')
+
+        title = f"{stream_index} - {title}"
 
         media_path = pathlib.Path(media_path)
 
-        filename = f"{media_path.stem}.{stream_index}.{title}.{lang}.{subtitle_ext}"
+        filename = f"{media_path.stem}.{title}.{lang}.{subtitle_ext}"
 
         if filename_only:
             return filename
