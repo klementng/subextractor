@@ -1,0 +1,9 @@
+services:
+    subtitle-extract:
+        image: ghcr.io/klementng/subtitle-extract:main
+        container_name: subtitle-extract
+        volumes:
+            - /path/to/media:/media
+        
+        command: --formats srt ass --languages eng --postprocessing ./postprocess.yml --scan_interval 30
+        restart: unless-stopped

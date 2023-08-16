@@ -1,0 +1,16 @@
+# Using pysubs2
+
+# Replace all styling in ASS subtitle
+SSAstyle:
+  fontname: 'Arial'
+  fontsize: 30
+  borderstyle: 0
+  marginl: 20
+  marginr: 20
+  marginv: 20
+
+save:
+  # SRT
+  apply_styles: false
+  keep_unknown_html_tags: false
+  keep_ssa_tags: true

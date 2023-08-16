@@ -1,0 +1,4 @@
+babelfish==0.6.0
+cachetools==5.3.0
+pgsrip==0.1.9
+tqdm==4.66.1
