@@ -33,6 +33,7 @@ def main(args):
             subtitle_files = extractor.extract(f)
         
             if args.postprocessing != None:
+                logger.info("Post processing subtitle file")
                 postprocessing.standardize(args.postprocessing,subtitle_files)
         
         except KeyboardInterrupt:
