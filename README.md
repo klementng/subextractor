@@ -7,7 +7,9 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-Extract Subtitles from media files
+Extract text and image based subtitles from media files using ffmpeg.
+
+For image / bitmap based subtitiles, it is first converted to pgssub and extracted using [pgsrip](https://github.com/ratoaq2/pgsrip) to srt. From srt it is converted to the desired formats.
 
 ## Installation
 

@@ -8,7 +8,10 @@ def standardize(config_path,files):
 
     for path in files:
         sub = pysubs2.SSAFile.load(path)
-    
+
+        sub.info.pop("PlayResX",None)
+        sub.info.pop("PlayResY",None)
+
         for key in sub.styles.keys():
             sub.styles[key] = pysubs2.SSAStyle(**config["SSAstyle"])
 
