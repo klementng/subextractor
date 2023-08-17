@@ -302,8 +302,9 @@ class TextSubtitleExtractor(BaseSubtitleExtractor):
 
 class SubtitleExtractor(BaseSubtitleExtractor):
 
-    def __init__(self, formats=['srt'], languages=['all'], overwrite=False) -> None:
+    def __init__(self, formats=['srt'], languages=['all'], overwrite=False, extract_bitmap=True) -> None:
         super().__init__(formats, languages, overwrite)
+        self.extract_bitmap = extract_bitmap
 
     def extract(self, media_path):
         logger.info(f"[SubtitleExtractor] Processing {media_path}")
@@ -333,7 +334,7 @@ class SubtitleExtractor(BaseSubtitleExtractor):
             filelist1 = extractor.extract(media_path, text_streams)
             filelist.extend(filelist1)
 
-        if len(bitmap_streams) != 0:
+        if len(bitmap_streams) != 0 and self.extract_bitmap:
             extractor = BitMapSubtitleExtractor.init(self)
             filelist2 = extractor.extract(media_path, bitmap_streams)
             filelist.extend(filelist2)

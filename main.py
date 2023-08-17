@@ -25,7 +25,7 @@ def main(args):
         progress = files
 
     extractor = extract.SubtitleExtractor(
-        args.formats, args.languages, args.overwrite)
+        args.formats, args.languages, args.overwrite,not args.disable_bitmap_extraction)
 
     for f in progress:
         try:
@@ -52,6 +52,8 @@ if __name__ == '__main__':
         '--languages', help="Select subtitle languages stream to extract from, use 'all' to extract all languages", nargs='+', default=['eng'])
     parser.add_argument(
         '--overwrite', help="Overwrite existing subtitle file", action='store_true')
+    parser.add_argument(
+        '--disable_bitmap_extraction', help="Disable bitmap subtitle extraction via OCR", action='store_true')
     parser.add_argument(
         '--postprocessing', help="Path to postprocessing config file", type=str, default=None)
     parser.add_argument(
