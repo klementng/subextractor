@@ -20,7 +20,7 @@ ass:
       fontsize: 50  #for 1920x1080 player
       marginl: 30   #for 1920x1080 player
       marginr: 30   #for 1920x1080 player
-      marginv: 30   #for 1920x1080 player
+      marginv: 50   #for 1920x1080 player
   
   replace:
    - regex: ''
