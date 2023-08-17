@@ -49,13 +49,13 @@ def ass(config,ass_path):
                 style_settings["fontsize"] = style_settings["fontsize"] / 1080 * float(sub.info["PlayResY"])
             
             if "marginv" in style_settings:
-                style_settings["marginv"] = style_settings["fontsize"] / 1080 * float(sub.info["PlayResY"])
+                style_settings["marginv"] = style_settings["marginv"] / 1080 * float(sub.info["PlayResY"])
 
             if "marginl" in style_settings:
                 style_settings["marginl"] = style_settings["marginl"] / 1920 * float(sub.info["PlayResX"])
                 
             if "marginr" in style_settings: 
-                style_settings["marginr"] = style_settings["fontsize"] / 1920 * float(sub.info["PlayResX"])
+                style_settings["marginr"] = style_settings["marginr"] / 1920 * float(sub.info["PlayResX"])
 
             if re.fullmatch(match_regex,str(key)) != None:
 
