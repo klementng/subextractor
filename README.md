@@ -22,7 +22,7 @@ services:
         volumes:
             - /path/to/media:/media
         
-        command: --formats srt ass --languages eng --postprocessing ./postprocess.yml --scan_interval 30
+        command: --formats srt ass --languages eng --postprocessing postprocess.yml --scan_interval 720 
         restart: unless-stopped
 ```
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -30,25 +30,25 @@ services:
 ## Usage:
 
 ```sh
-usage: main.py [-h] [--path PATH] [--formats FORMATS [FORMATS ...]] [--languages LANGUAGES [LANGUAGES ...]] [--overwrite]
-               [--postprocessing POSTPROCESSING] [--scan_interval SCAN_INTERVAL] [--log_level LOG_LEVEL] [--log_file LOG_FILE] [--progress_bar {on,off}]
+usage: main.py [-h] [--path PATH] [--formats {ass,srt,vtt} [{ass,srt,vtt} ...]] [--languages LANGUAGES [LANGUAGES ...]] [--overwrite] [--postprocessing POSTPROCESSING]
+               [--scan_interval SCAN_INTERVAL] [--log_level LOG_LEVEL] [--log_file LOG_FILE] [--progress_bar {on,off}]
 
 options:
   -h, --help            show this help message and exit
   --path PATH           Path to media file/folder
-  --formats FORMATS [FORMATS ...]
+  --formats {ass,srt,vtt} [{ass,srt,vtt} ...]
                         Subtitles formats to extract to
   --languages LANGUAGES [LANGUAGES ...]
-                        Extract languages
+                        Select subtitle languages stream to extract from, use 'all' to extract all languages
   --overwrite           Overwrite existing subtitle file
   --postprocessing POSTPROCESSING
-                        Apply postprocessing to subtitles file
+                        Path to postprocessing config file
   --scan_interval SCAN_INTERVAL
                         Interval to scan folder in mins (set 0 to disable and exit upon completion)
   --log_level LOG_LEVEL
                         Setting logging level
-  --log_file LOG_FILE   log to file
+  --log_file LOG_FILE   Path to log file
   --progress_bar {on,off}
-                        Enable tqdm progress bar
+                        Enable progress bar
 
 ```
