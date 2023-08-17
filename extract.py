@@ -109,8 +109,14 @@ class BaseSubtitleExtractor:
         ffprobe_info = self.get_subtitle_info(media_path)
 
         if self.overwrite == False and os.path.exists(subtitle_path):
-            logger.debug("Existing file found, overwrite = false, skipping...")
-            return False
+
+            if os.path.getsize(subtitle_path) == 0:
+                logger.warning("Found an empty subtitle file, not skipping...")
+                return True
+
+            else:
+                logger.debug("Existing file found, overwrite = false, skipping...")
+                return False
 
         elif 'all' not in self.languages and ffprobe_info[stream_index]['tags'].get('language') not in self.languages:
             logger.debug(
