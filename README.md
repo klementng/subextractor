@@ -19,6 +19,7 @@ services:
     subtitle-extract:
         image: ghcr.io/klementng/subtitle-extract:main
         container_name: subtitle-extract
+        user: 1000:1000
         volumes:
             - /path/to/media:/media
         

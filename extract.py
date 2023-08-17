@@ -4,6 +4,8 @@ import operator
 import os
 import pathlib
 import subprocess
+import tempfile
+import shutil
 
 import cachetools.func
 from babelfish import Language
@@ -177,24 +179,29 @@ class BitMapSubtitleExtractor(BaseSubtitleExtractor):
         return obj
 
     def _psgrip_extract(self, pgssub_path, srt_path, ocr_language):
+        
+        tmp_dir = tempfile.mkdtemp()
+        tmp_sub = os.path.join(tmp_dir,"tmpfile.sup")
+        tmp_srt = os.path.join(tmp_dir,"tmpfile.srt")
 
         logger.debug("Preforming OCR with psgrip...")
 
-        with open("tmpfile.sup", "wb") as tmp:
+        with open(tmp_sub, "wb") as tmp:
             with open(pgssub_path, "rb") as sup:
                 tmp.write(sup.read())
 
         pgsrip.rip(
-            Sup("tmpfile.sup"),
+            Sup(tmp_sub),
             Options(languages={Language(ocr_language)},
                     overwrite=True, one_per_lang=False))
 
-        with open("tmpfile.srt", "rb") as tmp:
+        with open(tmp_srt, "rb") as tmp:
             with open(srt_path, "wb") as srt:
                 srt.write(tmp.read())
+        
+        if os.path.exists(tmp_dir):
+            shutil.rmtree(tmp_dir)
 
-        os.remove("tmpfile.sup")
-        os.remove("tmpfile.srt")
 
     def extract(self, media_path: str, stream_indexes: list):
         logger.info(
