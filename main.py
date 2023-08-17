@@ -52,7 +52,7 @@ if __name__ == '__main__':
     parser.add_argument('--languages', help="Extract languages",nargs='+', default=['eng'])
     parser.add_argument('--overwrite', help="Overwrite existing subtitle file", action='store_true')
     parser.add_argument('--postprocessing', help="Apply postprocessing to subtitles file", type=str, default=None)
-    parser.add_argument('--scan_interval', help="Interval to scan folder in mins (set 0 to disable and exit upon completion) ", type=int, default=720)
+    parser.add_argument('--scan_interval', help="Interval to scan folder in mins (set 0 to disable and exit upon completion) ", type=int, default=0)
     parser.add_argument("--log_level",help="Setting logging level", default='CRITICAL')
     parser.add_argument("--log_file",help="log to file", default=None)
     parser.add_argument("--progress_bar",help="Enable tqdm progress bar", type=str, default='on', choices=['on','off'])

@@ -14,7 +14,6 @@ logger = logging.getLogger(__name__)
 SUPPORTED_FORMATS = [
     "ass",
     "srt",
-    "ssa",
     "vtt",
 ]
 
@@ -102,7 +101,7 @@ class BaseSubtitleExtractor:
         return info        
 
     def _ffmpeg_extract(self, media_path, args):
-        ffmpeg = ['ffmpeg', '-i', str(media_path), '-y', '-v', 'error']
+        ffmpeg = ['ffmpeg', '-v', 'error','-y','-i', str(media_path)]
 
         return self._subprocess_run(ffmpeg + args)
     

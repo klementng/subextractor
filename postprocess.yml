@@ -1,18 +1,43 @@
 # Using pysubs2
 
-# Replace all styling in ASS subtitle
-SSAstyle:
-  fontname: 'Arial'
-  fontsize: 16
-  borderstyle: 1
-  outline: 0
-  shadow: 1
-  marginl: 20
-  marginr: 20
-  marginv: 20
+ass:
+  general:
+    remove_miscellaneous_events: false
+    remove_comments: false
+    remove_drawings: false
 
-save:
-  # SRT
-  apply_styles: false
-  keep_unknown_html_tags: false
-  keep_ssa_tags: true
+  info: 
+    ScaledBorderAndShadow: 'yes'
+  
+  styles:
+    - regex: ".*" # apply to matching regex, ".*" is all styles 
+      mode: 'update' # update or replace
+      fontname: 'Arial'
+      borderstyle: 1
+      outline: 1
+      shadow: 1 
+      # will scaled accordingly if 'PlayResX' or 'PlayResY' is set 
+      fontsize: 50  #for 1920x1080 player
+      marginl: 30   #for 1920x1080 player
+      marginr: 30   #for 1920x1080 player
+      marginv: 30   #for 1920x1080 player
+  
+  replace:
+   - regex: ''
+     replacement: ''
+
+srt:  
+  general:
+    # if srt files contains ssa tags / converted from ass format
+    remove_miscellaneous_events: false
+    remove_comments: false
+    remove_drawings: false
+  
+  # Replace all positioning tags
+  replace:
+    - regex: '{\\an\d}'
+      replacement: '[*] '
+  
+  save:
+    keep_unknown_html_tags: false
+    keep_ssa_tags: false
