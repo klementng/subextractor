@@ -6,6 +6,7 @@ import pathlib
 import subprocess
 import tempfile
 import shutil
+import re
 
 import cachetools.func
 from babelfish import Language
@@ -155,6 +156,7 @@ class BaseSubtitleExtractor:
         title = ffprobe_info[stream_index]['tags'].get("title", 'Untitled')
 
         title = f"{stream_index} - {title}"
+        title = re.sub("[^\w_.)( -]"," ",title) # remove illegal character
 
         media_path = pathlib.Path(media_path)
 
