@@ -11,6 +11,7 @@ import extract
 
 logger = logging.getLogger(__name__)
 
+
 def main(args):
     files = []
 
@@ -23,13 +24,13 @@ def main(args):
     else:
         regex = "(?i)\.(mkv|mp4|webm|ts|ogg)$"
 
-
     for f in glob.iglob(args.path + '**/**', recursive=True):
         if re.search(regex, f) != None:
             files.append(f)
 
-    progress = tqdm.tqdm(files, desc=f'{datetime.datetime.now()} - Progress', unit='file') if args.progress_bar == 'on' else files
-    
+    progress = tqdm.tqdm(files, desc=f'{datetime.datetime.now()} - Progress',
+                         unit='file') if args.progress_bar == 'on' else files
+
     if args.postprocess_only == True:
         for f in progress:
 
@@ -44,14 +45,15 @@ def main(args):
 
     else:
         extractor = extract.SubtitleExtractor(
-            args.formats, args.languages, args.overwrite,not args.disable_bitmap_extraction)
+            args.formats, args.languages, args.overwrite, args.unknown_language_as, not args.disable_bitmap_extraction)
 
         for f in progress:
             try:
                 subtitle_files = extractor.extract(f)
 
                 if args.postprocessing != None:
-                    postprocessing.standardize(args.postprocessing, subtitle_files)
+                    postprocessing.standardize(
+                        args.postprocessing, subtitle_files)
 
             except KeyboardInterrupt:
                 exit(1)
@@ -69,6 +71,8 @@ if __name__ == '__main__':
         '--formats', help="Subtitles formats to extract to", nargs='+', default=['srt'], choices=extract.SUPPORTED_FORMATS)
     parser.add_argument(
         '--languages', help="Select subtitle languages stream to extract from, use 'all' to extract all languages", nargs='+', default=['eng'])
+    parser.add_argument(
+        '--unknown_language_as', help="Treat unknown language as", type=str, default=None)
     parser.add_argument(
         '--overwrite', help="Overwrite existing subtitle file", action='store_true')
     parser.add_argument(

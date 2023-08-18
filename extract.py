@@ -55,8 +55,8 @@ FFMPEG_BITMAP_FORMATS = [
 
 class BaseSubtitleExtractor:
 
-    def __init__(self, formats=['srt'], languages=['all'], overwrite=False) -> None:
-        self._cache = cachetools.FIFOCache(maxsize=5)
+    def __init__(self, formats=['srt'], languages=['all'], overwrite=False,unknown_language_as=None) -> None:
+        self._cache = cachetools.FIFOCache(maxsize=2)
 
         for f in formats:
             if f not in SUPPORTED_FORMATS:
@@ -64,6 +64,7 @@ class BaseSubtitleExtractor:
 
         self.formats = formats
         self.languages = languages
+        self.unknown_language_as = unknown_language_as
         self.overwrite = overwrite
 
     def _subprocess_run(self, args):
@@ -121,7 +122,7 @@ class BaseSubtitleExtractor:
                 logger.debug("Existing file found, overwrite = false, skipping...")
                 return False
 
-        elif 'all' not in self.languages and ffprobe_info[stream_index]['tags'].get('language') not in self.languages:
+        elif 'all' not in self.languages and ffprobe_info.get("tag",{}).get('language',self.unknown_language_as) not in self.languages:
             logger.debug(
                 f"Subtitle track not in wanted language {self.languages}, skipping...")
             return False
@@ -149,34 +150,44 @@ class BaseSubtitleExtractor:
             return info
 
     def format_subtitle_path(self, media_path, stream_index, subtitle_ext, filename_only=False):
-
+        
         ffprobe_info = self.get_subtitle_info(media_path)
-
-        lang = ffprobe_info[stream_index]['tags'].get('language', 'unknown')
-        title = ffprobe_info[stream_index]['tags'].get("title", 'Untitled')
-
-        title = f"{stream_index} - {title}"
-        title = re.sub("[^\w_.)( -]"," ",title) # remove illegal character
-
         media_path = pathlib.Path(media_path)
 
-        filename = f"{media_path.stem}.{title}.{lang}.{subtitle_ext}"
+        try:
+            lang = ffprobe_info[stream_index]['tags']['language']
+        except KeyError:
+            lang = 'unknown' if self.unknown_language_as == None else self.unknown_language_as 
+
+        title_old = ffprobe_info[stream_index].get('tags',{}).get("title", 'Untitled')
+        title_old = f"{stream_index} - {title_old}"
+        title_old = re.sub("[^\w_.)( -]"," ",title_old) # remove illegal character
+        filepath_old = f"{media_path.stem}.{title_old}.{lang}.{subtitle_ext}"
+
+        title = ffprobe_info[stream_index].get('tags',{}).get("title", None)
+        title = f"{stream_index} - {title}" if title != None else str(stream_index)
+        title = re.sub(r"""NUL|[\/:*"<>|.%$^&£?]"""," - ",title).replace("  "," ").strip()
+        filepath = f"{media_path.stem}.{title}.{lang}.{subtitle_ext}"
+
+        # migrate to new filename format
+        if os.path.exists(filepath_old):
+            os.rename(filepath_old,filepath)
 
         if filename_only:
-            return filename
+            return filepath
 
         else:
-            return os.path.join(media_path.parent, filename)
+            return os.path.join(media_path.parent, filepath)
 
 
 class BitMapSubtitleExtractor(BaseSubtitleExtractor):
 
-    def __init__(self, formats=['srt'], languages=['all'], overwrite=False) -> None:
-        super().__init__(formats, languages, overwrite)
-
+    def __init__(self, formats=['srt'], languages=['all'], overwrite=False, unknown_language_as=None) -> None:
+        super().__init__(formats, languages, overwrite, unknown_language_as)
+    
     @classmethod
     def init(cls, parent: BaseSubtitleExtractor):
-        obj = cls(parent.formats, parent.languages, parent.overwrite)
+        obj = cls(parent.formats, parent.languages, parent.overwrite, parent.unknown_language_as)
         obj._cache = parent._cache
         return obj
 
@@ -267,12 +278,12 @@ class BitMapSubtitleExtractor(BaseSubtitleExtractor):
 
 class TextSubtitleExtractor(BaseSubtitleExtractor):
 
-    def __init__(self, formats=['srt'], languages=['all'], overwrite=False) -> None:
-        super().__init__(formats, languages, overwrite)
+    def __init__(self, formats=['srt'], languages=['all'], overwrite=False, unknown_language_as=None) -> None:
+        super().__init__(formats, languages, overwrite, unknown_language_as)
 
     @classmethod
     def init(cls, parent: BaseSubtitleExtractor):
-        obj = cls(parent.formats, parent.languages, parent.overwrite)
+        obj = cls(parent.formats, parent.languages, parent.overwrite, parent.unknown_language_as)
         obj._cache = parent._cache
         return obj
 
@@ -304,8 +315,8 @@ class TextSubtitleExtractor(BaseSubtitleExtractor):
 
 class SubtitleExtractor(BaseSubtitleExtractor):
 
-    def __init__(self, formats=['srt'], languages=['all'], overwrite=False, extract_bitmap=True) -> None:
-        super().__init__(formats, languages, overwrite)
+    def __init__(self, formats=['srt'], languages=['all'], overwrite=False, unknown_language_as=None,extract_bitmap=True) -> None:
+        super().__init__(formats, languages, overwrite, unknown_language_as)
         self.extract_bitmap = extract_bitmap
 
     def extract(self, media_path):
