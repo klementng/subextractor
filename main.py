@@ -5,7 +5,6 @@ import logging
 import re
 import time
 import tqdm
-\
 
 import postprocessing
 import extract
