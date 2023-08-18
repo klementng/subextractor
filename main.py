@@ -11,6 +11,7 @@ import extract
 
 logger = logging.getLogger(__name__)
 
+_scanned_files = {}
 
 def main(args):
     files = []
@@ -32,7 +33,13 @@ def main(args):
                          unit='file') if args.progress_bar == 'on' else files
 
     if args.postprocess_only == True:
+        
         for f in progress:
+            
+            if f in _scanned_files:
+                continue
+            else:
+                _scanned_files.setdefault(f)
 
             try:
                 postprocessing.standardize(args.postprocessing, [f])
@@ -43,11 +50,18 @@ def main(args):
                 logger.critical("An error has occurred", exc_info=True)
                 continue
 
+
     else:
         extractor = extract.SubtitleExtractor(
             args.formats, args.languages, args.overwrite, args.unknown_language_as, not args.disable_bitmap_extraction)
 
         for f in progress:
+
+            if f in _scanned_files:
+                continue
+            else:
+                _scanned_files.setdefault(f)
+
             try:
                 subtitle_files = extractor.extract(f)
 
