@@ -31,8 +31,8 @@ services:
 ## Usage:
 
 ```sh
-usage: main.py [-h] [--path PATH] [--formats {ass,srt,vtt} [{ass,srt,vtt} ...]] [--languages LANGUAGES [LANGUAGES ...]] [--overwrite] [--postprocessing POSTPROCESSING]
-               [--scan_interval SCAN_INTERVAL] [--log_level LOG_LEVEL] [--log_file LOG_FILE] [--progress_bar {on,off}]
+usage: main.py [-h] [--path PATH] [--formats {ass,srt,vtt} [{ass,srt,vtt} ...]] [--languages LANGUAGES [LANGUAGES ...]] [--overwrite] [--disable_bitmap_extraction]
+               [--postprocess_only] [--postprocessing POSTPROCESSING] [--scan_interval SCAN_INTERVAL] [--log_level LOG_LEVEL] [--log_file LOG_FILE] [--progress_bar {on,off}]
 
 options:
   -h, --help            show this help message and exit
@@ -42,6 +42,9 @@ options:
   --languages LANGUAGES [LANGUAGES ...]
                         Select subtitle languages stream to extract from, use 'all' to extract all languages
   --overwrite           Overwrite existing subtitle file
+  --disable_bitmap_extraction
+                        Disable bitmap subtitle extraction via OCR
+  --postprocess_only    Only do conduct post processing
   --postprocessing POSTPROCESSING
                         Path to postprocessing config file
   --scan_interval SCAN_INTERVAL

@@ -3,12 +3,22 @@
 ass:
   general:
     remove_miscellaneous_events: false
+    remove_duplicate_lines: false
     remove_comments: false
     remove_drawings: false
-
-  info: 
-    ScaledBorderAndShadow: 'yes'
   
+  replace:
+   - regex: ''
+     replacement: ''
+
+  info:
+    # Remove the following keys (remove will occur first)
+    remove: []
+
+    # Update the following keys
+    update:
+      ScaledBorderAndShadow: 'yes'
+      
   styles:
     - regex: ".*" # apply to matching regex, ".*" is all styles 
       mode: 'update' # update or replace
@@ -22,14 +32,12 @@ ass:
       marginr: 30   #for 1920x1080 player
       marginv: 50   #for 1920x1080 player
   
-  replace:
-   - regex: ''
-     replacement: ''
 
 srt:  
   general:
     # if srt files contains ssa tags / converted from ass format
-    remove_miscellaneous_events: false
+    remove_miscellaneous_events: false # apl
+    remove_duplicate_lines: true
     remove_comments: false
     remove_drawings: false
   

@@ -14,32 +14,52 @@ logger = logging.getLogger(__name__)
 
 def main(args):
     files = []
+
+    if args.postprocess_only == True:
+        if 'all' not in args.languages:
+            regex = f"(?i)\.({'|'.join(args.languages)})\.({'|'.join(args.formats)})$"
+        else:
+            regex = f"(?i)\.({'|'.join(args.formats)})$"
+
+    else:
+        regex = "(?i)\.(mkv|mp4|webm|ts|ogg)$"
+
+
     for f in glob.iglob(args.path + '**/**', recursive=True):
-        if re.search("(?i)\.(mkv|mp4|webm|ts|ogg)$", f) != None:
+        if re.search(regex, f) != None:
             files.append(f)
 
-    if args.progress_bar == 'on':
-        progress = tqdm.tqdm(
-            files, desc=f'{datetime.datetime.now()} - Progress', unit='file')
+    progress = tqdm.tqdm(files, desc=f'{datetime.datetime.now()} - Progress', unit='file') if args.progress_bar == 'on' else files
+    
+    if args.postprocess_only == True:
+        for f in progress:
+
+            try:
+                postprocessing.standardize(args.postprocessing, [f])
+            except KeyboardInterrupt:
+                exit(1)
+
+            except:
+                logger.critical("An error has occurred", exc_info=True)
+                continue
+
     else:
-        progress = files
+        extractor = extract.SubtitleExtractor(
+            args.formats, args.languages, args.overwrite,not args.disable_bitmap_extraction)
 
-    extractor = extract.SubtitleExtractor(
-        args.formats, args.languages, args.overwrite,not args.disable_bitmap_extraction)
+        for f in progress:
+            try:
+                subtitle_files = extractor.extract(f)
 
-    for f in progress:
-        try:
-            subtitle_files = extractor.extract(f)
+                if args.postprocessing != None:
+                    postprocessing.standardize(args.postprocessing, subtitle_files)
 
-            if args.postprocessing != None:
-                postprocessing.standardize(args.postprocessing, subtitle_files)
+            except KeyboardInterrupt:
+                exit(1)
 
-        except KeyboardInterrupt:
-            exit(1)
-
-        except:
-            logger.critical("An error has occurred", exc_info=True)
-            continue
+            except:
+                logger.critical("An error has occurred", exc_info=True)
+                continue
 
 
 if __name__ == '__main__':
@@ -54,6 +74,8 @@ if __name__ == '__main__':
         '--overwrite', help="Overwrite existing subtitle file", action='store_true')
     parser.add_argument(
         '--disable_bitmap_extraction', help="Disable bitmap subtitle extraction via OCR", action='store_true')
+    parser.add_argument(
+        '--postprocess_only', help="Only do conduct post processing", action='store_true')
     parser.add_argument(
         '--postprocessing', help="Path to postprocessing config file", type=str, default=None)
     parser.add_argument(
