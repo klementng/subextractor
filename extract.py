@@ -171,6 +171,7 @@ class BaseSubtitleExtractor:
 
         # migrate to new filename format
         if os.path.exists(filepath_old):
+            logger.warning("Performing migration to new filename format")
             os.rename(filepath_old,filepath)
 
         if filename_only:
