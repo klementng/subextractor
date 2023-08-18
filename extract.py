@@ -162,12 +162,14 @@ class BaseSubtitleExtractor:
         title_old = ffprobe_info[stream_index].get('tags',{}).get("title", 'Untitled')
         title_old = f"{stream_index} - {title_old}"
         title_old = re.sub("[^\w_.)( -]"," ",title_old) # remove illegal character
-        filepath_old = f"{media_path.stem}.{title_old}.{lang}.{subtitle_ext}"
+        filename_old = f"{media_path.stem}.{title_old}.{lang}.{subtitle_ext}"
+        filepath_old = os.path.join(media_path.parent, filename_old)
 
         title = ffprobe_info[stream_index].get('tags',{}).get("title", None)
         title = f"{stream_index} - {title}" if title != None else str(stream_index)
         title = re.sub(r"""NUL|[\/:*"<>|.%$^&£?]"""," - ",title).replace("  "," ").strip()
-        filepath = f"{media_path.stem}.{title}.{lang}.{subtitle_ext}"
+        filename = f"{media_path.stem}.{title}.{lang}.{subtitle_ext}"
+        filepath = os.path.join(media_path.parent, filename)
 
         # migrate to new filename format
         if os.path.exists(filepath_old):
@@ -175,10 +177,9 @@ class BaseSubtitleExtractor:
             os.rename(filepath_old,filepath)
 
         if filename_only:
-            return filepath
-
+            return filename
         else:
-            return os.path.join(media_path.parent, filepath)
+            return filepath
 
 
 class BitMapSubtitleExtractor(BaseSubtitleExtractor):
