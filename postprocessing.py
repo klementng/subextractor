@@ -160,6 +160,7 @@ def standardize(config_path,files):
             formatter.format(path,save=True)
         
         elif str(path).endswith(".srt") or str(path).endswith(".vtt"):
+            logger.info(f"[PostProcessing] Formatting srt subtitle: {path}")
             formatter = SRTFormatter(config['srt'])
             formatter.format(path,save=True)
         
