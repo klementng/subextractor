@@ -122,7 +122,7 @@ class BaseSubtitleExtractor:
                 logger.debug("Existing file found, overwrite = false, skipping...")
                 return False
 
-        elif 'all' not in self.languages and ffprobe_info.get("tag",{}).get('language',self.unknown_language_as) not in self.languages:
+        elif 'all' not in self.languages and ffprobe_info[stream_index].get("tags",{}).get('language',self.unknown_language_as) not in self.languages:
             logger.debug(
                 f"Subtitle track not in wanted language {self.languages}, skipping...")
             return False
@@ -159,11 +159,11 @@ class BaseSubtitleExtractor:
         except KeyError:
             lang = 'unknown' if self.unknown_language_as == None else self.unknown_language_as 
 
-        title_old = ffprobe_info[stream_index].get('tags',{}).get("title", 'Untitled')
-        title_old = f"{stream_index} - {title_old}"
-        title_old = re.sub("[^\w_.)( -]"," ",title_old) # remove illegal character
-        filename_old = f"{media_path.stem}.{title_old}.{lang}.{subtitle_ext}"
-        filepath_old = os.path.join(media_path.parent, filename_old)
+        # title_old = ffprobe_info[stream_index].get('tags',{}).get("title", 'Untitled')
+        # title_old = f"{stream_index} - {title_old}"
+        # title_old = re.sub("[^\w_.)( -]"," ",title_old) # remove illegal character
+        # filename_old = f"{media_path.stem}.{title_old}.{lang}.{subtitle_ext}"
+        # filepath_old = os.path.join(media_path.parent, filename_old)
 
         title = ffprobe_info[stream_index].get('tags',{}).get("title", None)
         title = f"{stream_index} - {title}" if title != None else str(stream_index)
@@ -171,10 +171,10 @@ class BaseSubtitleExtractor:
         filename = f"{media_path.stem}.{title}.{lang}.{subtitle_ext}"
         filepath = os.path.join(media_path.parent, filename)
 
-        # migrate to new filename format
-        if os.path.exists(filepath_old):
-            logger.warning("Performing migration to new filename format")
-            os.rename(filepath_old,filepath)
+        # # migrate to new filename format
+        # if os.path.exists(filepath_old):
+        #     logger.warning("Performing migration to new filename format")
+        #     os.rename(filepath_old,filepath)
 
         if filename_only:
             return filename
