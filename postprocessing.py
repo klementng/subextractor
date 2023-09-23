@@ -154,15 +154,23 @@ def standardize(config_path,files):
 
     for path in files:
         
-        if str(path).endswith(".ass"):
-            logger.info(f"[PostProcessing] Formatting ass subtitle: {path}")
-            formatter = SSAFormatter(config['ass'])
-            formatter.format(path,save=True)
+        try:
+            if str(path).endswith(".ass"):
+                logger.info(f"[PostProcessing] Formatting ass subtitle: {path}")
+                formatter = SSAFormatter(config['ass'])
+                formatter.format(path,save=True)
+            
+            elif str(path).endswith(".srt") or str(path).endswith(".vtt"):
+                logger.info(f"[PostProcessing] Formatting srt subtitle: {path}")
+                formatter = SRTFormatter(config['srt'])
+                formatter.format(path,save=True)
+            
+            else:
+                logger.warning("[PostProcessing] Unsupported format")
         
-        elif str(path).endswith(".srt") or str(path).endswith(".vtt"):
-            logger.info(f"[PostProcessing] Formatting srt subtitle: {path}")
-            formatter = SRTFormatter(config['srt'])
-            formatter.format(path,save=True)
-        
-        else:
-            logger.warning("Unsupported format")
+        except (KeyboardInterrupt,SystemExit) as e:
+            raise e
+
+        except:
+            logger.critical("[Postprocessing] An error has occurred", exc_info=True)
+            continue
