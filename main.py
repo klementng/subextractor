@@ -6,6 +6,7 @@ import re
 import time
 import tqdm
 
+import os
 import postprocessing
 import extract
 
@@ -118,7 +119,7 @@ if __name__ == '__main__':
     if args.log_file != None:
         logging.getLogger().addHandler(logging.FileHandler(args.log_file))
 
-    if args.scanned_files_path != None:
+    if args.scanned_files_path != None and os.path.exists(args.scanned_files_path):
         with open(args.scanned_files_path) as f:
             for p in f.readlines():
                 _scanned_files.setdefault(p)
