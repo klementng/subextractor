@@ -75,7 +75,12 @@ def main(args):
             except:
                 logger.critical("An error has occurred", exc_info=True)
                 continue
-
+    
+    if args.scanned_files_path != None:
+        with open(args.scanned_files_path, 'w') as f:
+            for p in _scanned_files.keys():
+                f.writelines(p)
+                
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -103,13 +108,20 @@ if __name__ == '__main__':
         "--log_file", help="Path to log file", default=None)
     parser.add_argument(
         "--progress_bar", help="Enable progress bar", type=str, default='on', choices=['on', 'off'])
-
+    parser.add_argument(
+        "--scanned_files_path", help="Path to a list of already scanned files", type=str, default=None)
+    
     args = parser.parse_args()
 
     logging.basicConfig(
         format='%(asctime)s - %(name)s - %(funcName)s() - %(levelname)s - %(message)s', level=args.log_level)
     if args.log_file != None:
         logging.getLogger().addHandler(logging.FileHandler(args.log_file))
+
+    if args.scanned_files_path != None:
+        with open(args.scanned_files_path) as f:
+            for p in f.readlines():
+                _scanned_files.setdefault(p)
 
     main(args)
 
