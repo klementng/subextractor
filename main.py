@@ -79,8 +79,7 @@ def main(args):
     
     if args.scanned_files_path != None:
         with open(args.scanned_files_path, 'w') as f:
-            for p in _scanned_files.keys():
-                f.writelines(p)
+            f.writelines(_scanned_files.keys())
                 
 
 if __name__ == '__main__':

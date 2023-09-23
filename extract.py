@@ -356,7 +356,7 @@ class BitmapSubtitleExtractor(BaseSubtitleExtractor):
             self._run_ffmpeg(media_path, ffmpeg_args)
         else:
             logger.info(
-                "[BitMapSubtitleExtractor] .sup format found. Skipping...")
+                "[BitMapSubtitleExtractor] .sup format found. Skipping ffmpeg extraction..")
         
 
         #OCR bitmap based subtitles to SRT format
