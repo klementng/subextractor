@@ -5,7 +5,6 @@ import logging
 import re
 import time
 import tqdm
-import csv
 
 import os
 import postprocessing
@@ -78,10 +77,10 @@ def main(args):
                 logger.critical("An error has occurred", exc_info=True)
                 continue
     
-    if args.scanned_files_path != None:
-        with open(args.scanned_files_path, 'w') as f:
-            f.write("\n".join(_scanned_files.keys()))  
-
+    if args.exclude != None:
+        if args.exclude_mode == 'e+a':
+            with open(args.exclude, 'w') as f:
+                f.write("\n".join(_scanned_files.keys()))  
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -110,8 +109,6 @@ if __name__ == '__main__':
     parser.add_argument(
         "--progress_bar", help="Enable progress bar", type=str, default='on', choices=['on', 'off'])
     parser.add_argument(
-        "--scanned_files_path", help="Path to a list of already scanned files", type=str, default=None)
-    parser.add_argument(
         "--exclude", help="path to a newline separated file with paths to exclude", type=str, default=None)
     parser.add_argument(
         "--exclude_mode", help="set file exclusion behavior, e = exclude only, e+a = exclude and append file that are already extract", type=str, default='e', choices=['e','e+a'])
@@ -123,8 +120,8 @@ if __name__ == '__main__':
     if args.log_file != None:
         logging.getLogger().addHandler(logging.FileHandler(args.log_file))
 
-    if args.scanned_files_path != None and os.path.exists(args.scanned_files_path):
-        with open(args.scanned_files_path) as f:
+    if args.exclude != None and os.path.exists(args.exclude):
+        with open(args.exclude) as f:
             for p in f.read().splitlines():
                 _scanned_files.setdefault(p)
 
