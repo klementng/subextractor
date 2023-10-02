@@ -5,6 +5,7 @@ import logging
 import re
 import time
 import tqdm
+import csv
 
 import os
 import postprocessing
@@ -79,8 +80,8 @@ def main(args):
     
     if args.scanned_files_path != None:
         with open(args.scanned_files_path, 'w') as f:
-            f.writelines(_scanned_files.keys())
-                
+            f.write("\n".join(_scanned_files.keys()))  
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -110,7 +111,11 @@ if __name__ == '__main__':
         "--progress_bar", help="Enable progress bar", type=str, default='on', choices=['on', 'off'])
     parser.add_argument(
         "--scanned_files_path", help="Path to a list of already scanned files", type=str, default=None)
-    
+    parser.add_argument(
+        "--exclude", help="path to a newline separated file with paths to exclude", type=str, default=None)
+    parser.add_argument(
+        "--exclude_mode", help="set file exclusion behavior, e = exclude only, e+a = exclude and append file that are already extract", type=str, default='e', choices=['e','e+a'])
+
     args = parser.parse_args()
 
     logging.basicConfig(
@@ -120,8 +125,9 @@ if __name__ == '__main__':
 
     if args.scanned_files_path != None and os.path.exists(args.scanned_files_path):
         with open(args.scanned_files_path) as f:
-            for p in f.readlines():
+            for p in f.read().splitlines():
                 _scanned_files.setdefault(p)
+
 
     main(args)
 
