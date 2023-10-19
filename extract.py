@@ -337,7 +337,7 @@ class BitmapSubtitleExtractor(BaseSubtitleExtractor):
           a list of file paths.
         """
 
-        logger.info(
+        logger.debug(
             f"[BitMapSubtitleExtractor] Processing subtitles for {media_path}, streams: {stream_indexes}")
 
         ffmpeg_args = []
@@ -351,11 +351,11 @@ class BitmapSubtitleExtractor(BaseSubtitleExtractor):
                 ffmpeg_args.extend(['-map', f"0:{i}", "-c", "copy", sup_f])
 
         if ffmpeg_args != []:
-            logger.info(
+            logger.debug(
                 "[BitMapSubtitleExtractor] Extracting subtitles to .sup format...")
             self._run_ffmpeg(media_path, ffmpeg_args)
         else:
-            logger.info(
+            logger.debug(
                 "[BitMapSubtitleExtractor] .sup format found. Skipping ffmpeg extraction..")
         
 
@@ -367,12 +367,12 @@ class BitmapSubtitleExtractor(BaseSubtitleExtractor):
             srt_f = self.format_subtitle_path(media_path, i, 'srt')
 
             if self.is_wanted(media_path, srt_f, i):
-                logger.info(
+                logger.debug(
                     "[BitMapSubtitleExtractor] Performing OCR. Converting .sup to .srt")
                 self._run_psgrip_ocr(sup_f, srt_f, lang)
                 filelist.append(srt_f)
             else:
-                logger.info(
+                logger.debug(
                     "[BitMapSubtitleExtractor] .srt format found. Skipping OCR...")
 
             # Convert SRT to desired subtitles formats
@@ -387,12 +387,12 @@ class BitmapSubtitleExtractor(BaseSubtitleExtractor):
                     filelist.append(sub_f)
 
             if len(tmp_filelist) != 0:
-                logger.info(
+                logger.debug(
                     "[BitMapSubtitleExtractor] Converting .srt to desired format")
                 self._run_ffmpeg(srt_f, tmp_filelist)
 
             else:
-                logger.info(
+                logger.debug(
                     "[BitMapSubtitleExtractor] All desired format found, skipping...")
 
         return filelist
@@ -423,7 +423,7 @@ class TextSubtitleExtractor(BaseSubtitleExtractor):
           a list of file paths for the extracted subtitles.
         """
         
-        logger.info(
+        logger.debug(
             f"[TextSubtitleExtractor] Processing subtitles for {media_path}, streams: {stream_indexes}")
 
         ffmpeg_args = []
@@ -439,10 +439,10 @@ class TextSubtitleExtractor(BaseSubtitleExtractor):
                     filelist.append(f)
 
         if ffmpeg_args != []:
-            logger.info("[TextSubtitleExtractor] Extracting Subtitles...")
+            logger.debug("[TextSubtitleExtractor] Extracting Subtitles...")
             self._run_ffmpeg(media_path, ffmpeg_args)
         else:
-            logger.info(
+            logger.debug(
                 "[TextSubtitleExtractor] All desired format found, skipping...")
 
         return filelist
@@ -466,7 +466,7 @@ class SubtitleExtractor(BaseSubtitleExtractor):
         Returns:
           a list of files that were extracted.
         """
-        logger.info(f"[SubtitleExtractor] Processing {media_path}")
+        logger.debug(f"[SubtitleExtractor] Processing {media_path}")
 
         ffprobe_info = self.get_subtitle_info(media_path)
 
@@ -490,13 +490,13 @@ class SubtitleExtractor(BaseSubtitleExtractor):
 
         filelist = []
         if len(text_streams) != 0:
-            logger.info("[SubtitleExtractor] Extracting text based subtitles")
+            logger.debug("[SubtitleExtractor] Extracting text based subtitles")
             extractor = TextSubtitleExtractor.init(self)
             filelist1 = extractor.extract(media_path, text_streams)
             filelist.extend(filelist1)
 
         if len(bitmap_streams) != 0 and self.extract_bitmap:
-            logger.info("[SubtitleExtractor] Extracting bitmap based subtitles")
+            logger.debug("[SubtitleExtractor] Extracting bitmap based subtitles")
             extractor = BitmapSubtitleExtractor.init(self)
             filelist2 = extractor.extract(media_path, bitmap_streams)
             filelist.extend(filelist2)

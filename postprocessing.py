@@ -160,12 +160,12 @@ def standardize(config_path: str, path: str) -> str:
 
     try:
         if str(path).endswith(".ass"):
-            logger.info(f"[PostProcessing] Formatting ass subtitle: {path}")
+            logger.debug(f"[PostProcessing] Formatting ass subtitle: {path}")
             formatter = SSAFormatter(config['ass'])
             formatter.format(path, save=True)
 
         elif str(path).endswith(".srt") or str(path).endswith(".vtt"):
-            logger.info(f"[PostProcessing] Formatting srt subtitle: {path}")
+            logger.debug(f"[PostProcessing] Formatting srt subtitle: {path}")
             formatter = SRTFormatter(config['srt'])
             formatter.format(path, save=True)
 
