@@ -24,6 +24,7 @@ def get_filelist(path, regex, excluded_files=[]):
     files = []
 
     if os.path.isdir(path):
+        logger.info(f"Scanning directories...")
         for f in glob.iglob(args.path + '**/**', recursive=True):
             if re.search(regex, f) and f not in excluded_files and f not in files:
                 files.append(f)
@@ -75,7 +76,7 @@ def run(threads, function, files, disable_progress_bar=False):
     def _run_callback(out):
         nonlocal run_output
         nonlocal pbar
-
+        print("hello")
         pbar.update(1)
         pbar.set_postfix({"Current time": datetime.datetime.utcnow()})
         run_output.extend(out)
