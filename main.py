@@ -29,7 +29,7 @@ def get_filelist(path,regex,excluded_files=[]):
     else:
         files = [path]      
 
-    logger.info(f"Found {len(files)} files to be processed")
+    logger.info(f"Found {len(files)} files to be processed, {len(excluded_files)} excluded")
 
     return files
 
