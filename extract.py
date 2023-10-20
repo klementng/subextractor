@@ -109,7 +109,7 @@ class BaseSubtitleExtractor:
         return completed_process
 
     @staticmethod
-    @cachetools.func.fifo_cache(maxsize=1)
+    @cachetools.func.fifo_cache(maxsize=10)
     def _run_ffprobe(path):
         """
         The function `_run_ffprobe` is used to probe a media file and retrieve information about its

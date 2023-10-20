@@ -154,29 +154,30 @@ class SRTFormatter(BaseFormatter):
         super().__init__(config)
 
 
-def standardize(config_path: str, path: str) -> str:
-    with open(config_path) as cfg_file:
-        config = yaml.full_load(cfg_file.read())
+class SubtitleFormatter(BaseFormatter):
 
-    try:
-        if str(path).endswith(".ass"):
-            logger.debug(f"[PostProcessing] Formatting ass subtitle: {path}")
-            formatter = SSAFormatter(config['ass'])
-            formatter.format(path, save=True)
+    def __init__(self, config_path:str) -> None:
+        with open(config_path) as cfg_file:
+            self.config = yaml.full_load(cfg_file.read())
+    
+    def format(self,path):
+        try:
+            if str(path).endswith(".ass"):
+                logger.debug(f"[PostProcessing] Formatting ass subtitle: {path}")
+                formatter = SSAFormatter(self.config['ass'])
+                formatter.format(path, save=True)
 
-        elif str(path).endswith(".srt") or str(path).endswith(".vtt"):
-            logger.debug(f"[PostProcessing] Formatting srt subtitle: {path}")
-            formatter = SRTFormatter(config['srt'])
-            formatter.format(path, save=True)
+            elif str(path).endswith(".srt") or str(path).endswith(".vtt"):
+                logger.debug(f"[PostProcessing] Formatting srt subtitle: {path}")
+                formatter = SRTFormatter(self.config['srt'])
+                formatter.format(path, save=True)
 
-        else:
-            logger.warning("[PostProcessing] Unsupported format")
+            else:
+                logger.warning("[PostProcessing] Unsupported format")
 
-    except (KeyboardInterrupt, SystemExit) as e:
-        raise e
+        except (KeyboardInterrupt, SystemExit) as e:
+            raise e
 
-    except:
-        logger.critical(
-            "[Postprocessing] An error has occurred", exc_info=True)
-
-    return path
+        except:
+            logger.critical(
+                "[Postprocessing] An error has occurred", exc_info=True)

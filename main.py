@@ -4,53 +4,75 @@ import glob
 import logging
 import re
 import time
-import tqdm
-
 import multiprocessing
+
+from itertools import chain
+
+from tqdm_loggable.auto import tqdm
+from tqdm_loggable.tqdm_logging import tqdm_logging
+
 
 import os
 import postprocessing
 import extract
 
+
 logger = logging.getLogger(__name__)
 
-def get_files_list(args):
-    excluded_files = []
-
-    if args.postprocess_only == True:
-        if 'all' not in args.languages:
-            regex = f"(?i)\.({'|'.join(args.languages)})\.({'|'.join(args.formats)})$"
-        else:
-            regex = f"(?i)\.({'|'.join(args.formats)})$"
-
-        if args.exclude_subtitles != None:
-            with open(args.exclude_subtitles) as f:
-                excluded_files = f.read().splitlines()
-
-    else:
-        regex = "(?i)\.(mkv|mp4|webm|ts|ogg)$"
-
-        if args.exclude_videos != None:
-            with open(args.exclude_videos) as f:
-                excluded_files = f.read().splitlines()
-    
+def get_filelist(regex,excluded_files=[]):
     files = []
 
     for f in glob.iglob(args.path + '**/**', recursive=True):
         if re.search(regex, f) and f not in excluded_files and f not in files:
             files.append(f)      
 
+
+    logger.info(f"Found {len(files)} files to be processed")
+
     return files
 
+def get_subtitles_filelist(args):
+    logger.debug("Searching for subtitles files")
 
-def run(threads,function,files):
+    if 'all' not in args.languages:
+        regex = f"(?i)\.({'|'.join(args.languages)})\.({'|'.join(args.formats)})$"
+    else:
+        regex = f"(?i)\.({'|'.join(args.formats)})$"
+
+    if args.exclude_subtitles != None:
+        with open(args.exclude_subtitles) as f:
+            excluded_files = f.read().splitlines()
+    else:
+        excluded_files = []
+
+    return get_filelist(regex,excluded_files)
+
+
+def get_media_filelist(args):
+    logger.debug("Searching for media .(mkv|mp4|webm|ts|ogg) files")
+
+    regex = "(?i)\.(mkv|mp4|webm|ts|ogg)$"
+
+    if args.exclude_videos != None:
+        with open(args.exclude_videos) as f:
+            excluded_files = f.read().splitlines()
+    else:
+        excluded_files =[]
+    
+    return get_filelist(regex,excluded_files)
+
+
+
+def run(threads,function,files,disable_progress_bar=False):
+    progress_bar  = tqdm(total=len(files), desc="Progress", unit='file',disable=disable_progress_bar)
 
     run_output = []
 
     def _run_callback(out):   
         nonlocal run_output
+        progress_bar.update(1)
         run_output.extend(out)
-    
+                    
     with multiprocessing.Pool(threads) as p:
         p.map_async(
             function,
@@ -64,12 +86,20 @@ def run(threads,function,files):
 
 def main(args):
 
-    files = get_files_list(args)
-
     if args.postprocess_only == True:
-        output = run(args.threads,postprocessing.standardize,files)
+        files = get_subtitles_filelist(args)
+        postprocesser = postprocessing.SubtitleFormatter(args.postprocessing)
+        output = run(args.threads,postprocesser.format,files,args.disable_progress_bar)
+        output_filelist = list(chain.from_iterable(output))
     
+        if args.exclude_mode == 'e+a' and args.exclude_subtitles != None:
+            with open(args.exclude_subtitles, 'a') as f:
+                f.write("\n".join(files))
+
     else:
+        files = get_media_filelist(args)
+
+        logger.info("Extracting subtitles...")
         extractor = extract.SubtitleExtractor(
             args.formats, 
             args.languages, 
@@ -78,60 +108,17 @@ def main(args):
             not args.disable_bitmap_extraction
         )
 
-        output = run(args.threads,extractor.extract,files)
+        output = run(args.threads,extractor.extract,files,args.disable_progress_bar)
+        output_filelist = list(chain.from_iterable(output))
 
-    print(output)
-
-
-
-    # if args.postprocess_only == True:
-
-    #     for f in progress:
-
-    #         if f in _scanned_files:
-    #             continue
-    #         else:
-    #             _scanned_files.setdefault(f)
-
-    #         try:
-    #             postprocessing.standardize(args.postprocessing, [f])
-    #         except KeyboardInterrupt:
-    #             exit(1)
-
-    #         except:
-    #             logger.critical("An error has occurred", exc_info=True)
-    #             continue
-
-    # else:
-    #     extractor = extract.SubtitleExtractor(
-    #         args.formats, args.languages, args.overwrite, args.unknown_language_as, not args.disable_bitmap_extraction)
-
-    #     for f in progress:
-
-    #         if f in _scanned_files:
-    #             continue
-    #         else:
-    #             _scanned_files.setdefault(f)
-
-    #         try:
-    #             subtitle_files = extractor.extract(f)
-
-    #             if args.postprocessing != None:
-    #                 postprocessing.standardize(
-    #                     args.postprocessing, subtitle_files)
-
-    #         except KeyboardInterrupt:
-    #             exit(1)
-
-    #         except:
-    #             logger.critical("An error has occurred", exc_info=True)
-    #             continue
-
-    # if args.exclude != None:
-    #     if args.exclude_mode == 'e+a':
-    #         with open(args.exclude, 'w') as f:
-    #             f.write("\n".join(_scanned_files.keys()))
-
+        if args.postprocessing != None:
+            logger.info("Postprocessing subtitles...")
+            postprocesser = postprocessing.SubtitleFormatter(args.postprocessing)
+            run(args.threads,postprocesser.format,output_filelist,args.disable_progress_bar)
+    
+        if args.exclude_mode == 'e+a' and args.exclude_videos != None:
+            with open(args.exclude_videos, 'a') as f:
+                f.write("\n".join(files))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -150,15 +137,15 @@ if __name__ == '__main__':
     parser.add_argument(
         '--postprocess_only', help="only do conduct post processing", action='store_true')
     parser.add_argument(
-        '--postprocessing', help="path to postprocessing config file", type=str, default=None)
+        '--postprocessing', help="path to postprocessing config file", type=str, default='postprocess.yml')
     parser.add_argument(
         '--scan_interval', help="interval to monitor and scan folder in mins (set 0 to disable and exit upon completion) ", type=int, default=0)
     parser.add_argument(
-        "--log_level", help="setting logging level", default='WARNING')
+        "--log_level", help="setting logging level", default='INFO')
     parser.add_argument(
         "--log_file", help="path to log file", default=None)
     parser.add_argument(
-        "--progress_bar", help="enable progress bar", type=str, default='on', choices=['on', 'off'])
+        "--disable_progress_bar", help="enable progress bar", action='store_true')
     parser.add_argument(
         "--exclude_videos", help="path to a newline separated file with paths to video files to exclude", type=str, default=None)
     parser.add_argument(
@@ -166,7 +153,7 @@ if __name__ == '__main__':
     parser.add_argument(
         "--exclude_mode", help="set file exclusion behavior, e = exclude only, e+a = exclude and append new extracted file", type=str, default='e', choices=['e', 'e+a'])
     parser.add_argument(
-        '--threads', help="treat unknown language as", type=int, default=4)
+        '--threads', help="set number of extraction threads", type=int, default=4)
 
     args = parser.parse_args()
 
