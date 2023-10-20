@@ -67,7 +67,7 @@ def get_media_filelist(args):
 
 def run(threads,function,files,disable_progress_bar=False):
     
-    with tqdm(total=len(files), desc="Progress", unit='file',disable=disable_progress_bar) as progress_bar:
+    with tqdm(total=len(files), unit='file',disable=disable_progress_bar) as progress_bar:
 
         run_output = []
 
