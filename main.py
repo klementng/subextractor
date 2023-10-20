@@ -70,27 +70,27 @@ def get_media_filelist(args):
 
 def run(threads, function, files, disable_progress_bar=False):
 
-    pbar = tqdm(total=len(files), unit='file', disable=disable_progress_bar)
-    run_output = []
+    with tqdm(total=len(files), unit='file', disable=disable_progress_bar) as pbar:
+        run_output = []
 
-    def _run_callback(out):
-        nonlocal run_output
-        nonlocal pbar
-        print("hello")
-        pbar.update(1)
-        pbar.set_postfix({"Current time": datetime.datetime.utcnow()})
-        run_output.extend(out)
+        def _run_callback(out):
+            nonlocal run_output
+            nonlocal pbar
+            pbar.update(1)
+            run_output.append(out)
 
-    with multiprocessing.Pool(threads) as p:
-        p.map_async(
-            function,
-            files,
-            callback=_run_callback
-        )
-        p.close()
-        p.join()
+        with multiprocessing.Pool(threads) as pool:
 
-    return run_output
+            for i in range(pbar.total):            
+                pool.apply_async(
+                    function,
+                    args=(files[i],),
+                    callback=_run_callback
+                )
+            pool.close()
+            pool.join()
+
+        return run_output
 
 
 def main(args):

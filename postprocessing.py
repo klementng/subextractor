@@ -173,3 +173,5 @@ class SubtitleFormatter(BaseFormatter):
 
         else:
             logger.warning("[PostProcessing] Unsupported format")
+        
+        return path
