@@ -44,7 +44,7 @@ srt:
   # Replace all positioning tags
   replace:
     - regex: '{\\an\d}'
-      replacement: '[*] '
+      replacement: '[+] '
   
   save:
     keep_unknown_html_tags: false

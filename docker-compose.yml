@@ -1,5 +1,9 @@
 services:
+    
     subtitle-extract:
+        build: .
+
+    subtitle-extract-image:
         image: ghcr.io/klementng/subtitle-extract:main
         container_name: subtitle-extract
         volumes:
