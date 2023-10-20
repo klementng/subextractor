@@ -2,6 +2,8 @@ services:
     
     subtitle-extract:
         build: .
+        volumes:
+            - ./tests/samples:/media
 
     subtitle-extract-image:
         image: ghcr.io/klementng/subtitle-extract:main
