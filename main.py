@@ -157,7 +157,7 @@ if __name__ == '__main__':
     parser.add_argument(
         "--log_file", help="path to log file", default=None)
     parser.add_argument(
-        "--disable_progress_bar", help="enable progress bar", type=bool, default=False, action='store_true')
+        "--disable_progress_bar", help="enable progress bar", default=False, action='store_true')
     parser.add_argument(
         "--exclude_videos", help="path to a newline separated file with paths to video files to exclude", type=str, default=None)
     parser.add_argument(
