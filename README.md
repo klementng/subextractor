@@ -15,16 +15,18 @@ For image / bitmap based subtitiles, it is first converted to pgssub and extract
 
 ### Docker Compose
 ```yaml
-services:
-    subtitle-extract:
-        image: ghcr.io/klementng/subtitle-extract:main
-        container_name: subtitle-extract
-        user: 1000:1000
-        volumes:
-            - /path/to/media:/media
-        
-        command: --formats srt ass --languages eng --postprocessing postprocess.yml --scan_interval 720 
-        restart: unless-stopped
+  subtitle-extract:
+    #image: ghcr.io/klementng/subtitle-extract:main
+    build: https://github.com/klementng/subtitle-extract.git#dev
+    container_name: jellyfin-subtitle-extract
+    user: ${PUID}:${PGID}
+    environment:
+      - TZ=${TZ}
+    volumes:
+      - ./subtitle-extract:/config
+      - ./path/to/media/media
+    command: /media --formats srt ass --languages eng --scan_interval 15 --log_level INFO --postprocessing postprocess.yml --unknown_language_as eng --exclude_videos /config/scanned-video.txt --exclude_mode e+a
+    restart: unless-stopped
 ```
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
