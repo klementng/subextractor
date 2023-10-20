@@ -77,6 +77,7 @@ def run(threads, function, files, disable_progress_bar=False):
         nonlocal pbar
 
         pbar.update(1)
+        pbar.set_postfix({"Current time": datetime.datetime.utcnow()})
         run_output.extend(out)
 
     with multiprocessing.Pool(threads) as p:
