@@ -161,23 +161,15 @@ class SubtitleFormatter(BaseFormatter):
             self.config = yaml.full_load(cfg_file.read())
     
     def format(self,path):
-        try:
-            if str(path).endswith(".ass"):
-                logger.debug(f"[PostProcessing] Formatting ass subtitle: {path}")
-                formatter = SSAFormatter(self.config['ass'])
-                formatter.format(path, save=True)
+        if str(path).endswith(".ass"):
+            logger.debug(f"[PostProcessing] Formatting ass subtitle: {path}")
+            formatter = SSAFormatter(self.config['ass'])
+            formatter.format(path, save=True)
 
-            elif str(path).endswith(".srt") or str(path).endswith(".vtt"):
-                logger.debug(f"[PostProcessing] Formatting srt subtitle: {path}")
-                formatter = SRTFormatter(self.config['srt'])
-                formatter.format(path, save=True)
+        elif str(path).endswith(".srt") or str(path).endswith(".vtt"):
+            logger.debug(f"[PostProcessing] Formatting srt subtitle: {path}")
+            formatter = SRTFormatter(self.config['srt'])
+            formatter.format(path, save=True)
 
-            else:
-                logger.warning("[PostProcessing] Unsupported format")
-
-        except (KeyboardInterrupt, SystemExit) as e:
-            raise e
-
-        except:
-            logger.critical(
-                "[Postprocessing] An error has occurred", exc_info=True)
+        else:
+            logger.warning("[PostProcessing] Unsupported format")
