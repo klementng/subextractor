@@ -19,19 +19,22 @@ import extract
 
 logger = logging.getLogger(__name__)
 
-def get_filelist(path,regex,excluded_files=[]):
+
+def get_filelist(path, regex, excluded_files=[]):
     files = []
-    
+
     if os.path.isdir(path):
         for f in glob.iglob(args.path + '**/**', recursive=True):
             if re.search(regex, f) and f not in excluded_files and f not in files:
                 files.append(f)
     else:
-        files = [path]      
+        files = [path]
 
-    logger.info(f"Found {len(files)} files to be processed, {len(excluded_files)} excluded")
+    logger.info(
+        f"Found {len(files)} files to be processed, {len(excluded_files)} excluded")
 
     return files
+
 
 def get_subtitles_filelist(args):
     logger.debug("Searching for subtitles files")
@@ -47,7 +50,7 @@ def get_subtitles_filelist(args):
     else:
         excluded_files = []
 
-    return get_filelist(args.path,regex,excluded_files)
+    return get_filelist(args.path, regex, excluded_files)
 
 
 def get_media_filelist(args):
@@ -59,42 +62,44 @@ def get_media_filelist(args):
         with open(args.exclude_videos) as f:
             excluded_files = f.read().splitlines()
     else:
-        excluded_files =[]
-    
-    return get_filelist(args.path,regex,excluded_files)
+        excluded_files = []
+
+    return get_filelist(args.path, regex, excluded_files)
 
 
+def run(threads, function, files, disable_progress_bar=False):
 
-def run(threads,function,files,disable_progress_bar=False):
-    
-    with tqdm(total=len(files), unit='file',disable=disable_progress_bar) as progress_bar:
+    pbar = tqdm(total=len(files), unit='file', disable=disable_progress_bar)
+    run_output = []
 
-        run_output = []
+    def _run_callback(out):
+        nonlocal run_output
+        nonlocal pbar
 
-        def _run_callback(out):   
-            nonlocal run_output
-            progress_bar.update(1)
-            run_output.extend(out)
-                        
-        with multiprocessing.Pool(threads) as p:
-            p.map_async(
-                function,
-                files,
-                callback=_run_callback
-            )
-            p.close()
-            p.join()
+        pbar.update(1)
+        run_output.extend(out)
 
-        return run_output
+    with multiprocessing.Pool(threads) as p:
+        p.map_async(
+            function,
+            files,
+            callback=_run_callback
+        )
+        p.close()
+        p.join()
+
+    return run_output
+
 
 def main(args):
 
     if args.postprocess_only == True:
         files = get_subtitles_filelist(args)
         postprocesser = postprocessing.SubtitleFormatter(args.postprocessing)
-        output = run(args.threads,postprocesser.format,files,args.disable_progress_bar)
+        output = run(args.threads, postprocesser.format,
+                     files, args.disable_progress_bar)
         output_filelist = list(chain.from_iterable(output))
-    
+
         if args.exclude_mode == 'e+a' and args.exclude_subtitles != None:
             with open(args.exclude_subtitles, 'a') as f:
                 f.write("\n".join(files))
@@ -104,24 +109,28 @@ def main(args):
 
         logger.info("Extracting subtitles...")
         extractor = extract.SubtitleExtractor(
-            args.formats, 
-            args.languages, 
-            args.overwrite, 
-            args.unknown_language_as, 
+            args.formats,
+            args.languages,
+            args.overwrite,
+            args.unknown_language_as,
             not args.disable_bitmap_extraction
         )
 
-        output = run(args.threads,extractor.extract,files,args.disable_progress_bar)
+        output = run(args.threads, extractor.extract,
+                     files, args.disable_progress_bar)
         output_filelist = list(chain.from_iterable(output))
 
         if args.postprocessing != None:
             logger.info("Postprocessing subtitles...")
-            postprocesser = postprocessing.SubtitleFormatter(args.postprocessing)
-            run(args.threads,postprocesser.format,output_filelist,args.disable_progress_bar)
-    
+            postprocesser = postprocessing.SubtitleFormatter(
+                args.postprocessing)
+            run(args.threads, postprocesser.format,
+                output_filelist, args.disable_progress_bar)
+
         if args.exclude_mode == 'e+a' and args.exclude_videos != None:
             with open(args.exclude_videos, 'a') as f:
                 f.write("\n".join(files))
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -148,7 +157,7 @@ if __name__ == '__main__':
     parser.add_argument(
         "--log_file", help="path to log file", default=None)
     parser.add_argument(
-        "--disable_progress_bar", help="enable progress bar", action='store_true')
+        "--disable_progress_bar", help="enable progress bar", type=bool, default=False, action='store_true')
     parser.add_argument(
         "--exclude_videos", help="path to a newline separated file with paths to video files to exclude", type=str, default=None)
     parser.add_argument(
@@ -164,7 +173,6 @@ if __name__ == '__main__':
         format='%(asctime)s - %(name)s - %(funcName)s() - %(levelname)s - %(message)s', level=args.log_level)
     if args.log_file != None:
         logging.getLogger().addHandler(logging.FileHandler(args.log_file))
-
 
     main(args)
 
