@@ -19,13 +19,15 @@ import extract
 
 logger = logging.getLogger(__name__)
 
-def get_filelist(regex,excluded_files=[]):
+def get_filelist(path,regex,excluded_files=[]):
     files = []
-
-    for f in glob.iglob(args.path + '**/**', recursive=True):
-        if re.search(regex, f) and f not in excluded_files and f not in files:
-            files.append(f)      
-
+    
+    if os.path.isdir(path):
+        for f in glob.iglob(args.path + '**/**', recursive=True):
+            if re.search(regex, f) and f not in excluded_files and f not in files:
+                files.append(f)
+    else:
+        files = [path]      
 
     logger.info(f"Found {len(files)} files to be processed")
 
@@ -45,7 +47,7 @@ def get_subtitles_filelist(args):
     else:
         excluded_files = []
 
-    return get_filelist(regex,excluded_files)
+    return get_filelist(args.path,regex,excluded_files)
 
 
 def get_media_filelist(args):
@@ -59,7 +61,7 @@ def get_media_filelist(args):
     else:
         excluded_files =[]
     
-    return get_filelist(regex,excluded_files)
+    return get_filelist(args.path,regex,excluded_files)
 
 
 

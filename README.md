@@ -31,28 +31,35 @@ services:
 ## Usage:
 
 ```sh
-usage: main.py [-h] [--path PATH] [--formats {ass,srt,vtt} [{ass,srt,vtt} ...]] [--languages LANGUAGES [LANGUAGES ...]] [--overwrite] [--disable_bitmap_extraction]
-               [--postprocess_only] [--postprocessing POSTPROCESSING] [--scan_interval SCAN_INTERVAL] [--log_level LOG_LEVEL] [--log_file LOG_FILE] [--progress_bar {on,off}]
+positional arguments:
+  path                  path to media file/folder
 
 options:
   -h, --help            show this help message and exit
-  --path PATH           Path to media file/folder
   --formats {ass,srt,vtt} [{ass,srt,vtt} ...]
-                        Subtitles formats to extract to
+                        output subtitles formats
   --languages LANGUAGES [LANGUAGES ...]
-                        Select subtitle languages stream to extract from, use 'all' to extract all languages
-  --overwrite           Overwrite existing subtitle file
+                        extract subtitle for selected languages, use 'all' to extract all languages
+  --unknown_language_as UNKNOWN_LANGUAGE_AS
+                        treat unknown language as
+  --overwrite           overwrite existing subtitle file
   --disable_bitmap_extraction
-                        Disable bitmap subtitle extraction via OCR
-  --postprocess_only    Only do conduct post processing
+                        disable extraction for bitmap based subtitle extraction via OCR
+  --postprocess_only    only do conduct post processing
   --postprocessing POSTPROCESSING
-                        Path to postprocessing config file
+                        path to postprocessing config file
   --scan_interval SCAN_INTERVAL
-                        Interval to scan folder in mins (set 0 to disable and exit upon completion)
+                        interval to monitor and scan folder in mins (set 0 to disable and exit upon completion)
   --log_level LOG_LEVEL
-                        Setting logging level
-  --log_file LOG_FILE   Path to log file
-  --progress_bar {on,off}
-                        Enable progress bar
-
+                        setting logging level
+  --log_file LOG_FILE   path to log file
+  --disable_progress_bar
+                        enable progress bar
+  --exclude_videos EXCLUDE_VIDEOS
+                        path to a newline separated file with paths to video files to exclude
+  --exclude_subtitles EXCLUDE_SUBTITLES
+                        path to a newline separated file with paths to subtitles files to exclude
+  --exclude_mode {e,e+a}
+                        set file exclusion behavior, e = exclude only, e+a = exclude and append new extracted file
+  --threads THREADS     set number of extraction thread
 ```
