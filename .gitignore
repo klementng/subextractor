@@ -161,3 +161,11 @@ cython_debug/
 test.ipynb
 .gitignore
 tests/samples/text.2.eng.srt
+tests/samples/text.3.hun.srt
+tests/samples/text.4.ger.srt
+tests/samples/text.5.fre.srt
+tests/samples/text.6.spa.srt
+tests/samples/text.7.ita.srt
+tests/samples/text.9.jpn.srt
+tests/samples/text.10.unknown.srt
+tests/samples/text.2.eng.ass
