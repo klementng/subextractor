@@ -1,33 +1,14 @@
 
 <a name="readme-top"></a>
 
-
 # Subtitle Extract
 
-<!-- ABOUT THE PROJECT -->
 ## About The Project
 
 Extract text and image based subtitles from media files using ffmpeg.
 
-For image / bitmap based subtitiles, it is first converted to pgssub and extracted using [pgsrip](https://github.com/ratoaq2/pgsrip) to srt. From srt it is converted to the desired formats.
-
 ## Installation
-
-### Docker Compose
-```yaml
-  subtitle-extract:
-    #image: ghcr.io/klementng/subtitle-extract:main
-    build: https://github.com/klementng/subtitle-extract.git#dev
-    container_name: jellyfin-subtitle-extract
-    user: ${PUID}:${PGID}
-    environment:
-      - TZ=${TZ}
-    volumes:
-      - ./subtitle-extract:/config
-      - ./path/to/media/media
-    command: /media --formats srt ass --languages eng --scan_interval 15 --log_level INFO --postprocessing postprocess.yml --unknown_language_as eng --exclude_videos /config/scanned-video.txt --exclude_mode e+a
-    restart: unless-stopped
-```
+see [docker-compose.yml](./docker-compose.yml)
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Usage:

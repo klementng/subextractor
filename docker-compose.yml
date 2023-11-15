@@ -1,15 +1,20 @@
 services:
     
-    subtitle-extract:
+    subtitle-extract-test:
         build: .
+        command: /media --formats srt ass --languages eng --postprocessing ./postprocess.yml --scan_interval 30
         volumes:
             - ./tests/samples:/media
-
-    subtitle-extract-image:
+    
+    #sample config
+    subtitle-extract:
         image: ghcr.io/klementng/subtitle-extract:main
         container_name: subtitle-extract
+        environment:
+            - PGID=1000
+            - PUID=1000
+            - TZ=Etc/UTC
         volumes:
             - /path/to/media:/media
-        
-        command: --formats srt ass --languages eng --postprocessing ./postprocess.yml --scan_interval 30
+        command: /media --formats srt ass --languages eng --postprocessing ./postprocess.yml --scan_interval 30
         restart: unless-stopped
