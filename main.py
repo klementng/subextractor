@@ -41,9 +41,9 @@ def get_subtitles_filelist(args):
     logger.debug("Searching for subtitles files")
 
     if 'all' not in args.languages:
-        regex = f"(?i)\.({'|'.join(args.languages)})\.({'|'.join(args.formats)})$"
+        regex = f"(?i)\\.({'|'.join(args.languages)})\\.({'|'.join(args.formats)})$"
     else:
-        regex = f"(?i)\.({'|'.join(args.formats)})$"
+        regex = f"(?i)\\.({'|'.join(args.formats)})$"
 
     if args.exclude_subtitles != None:
         with open(args.exclude_subtitles) as f:
@@ -57,7 +57,7 @@ def get_subtitles_filelist(args):
 def get_media_filelist(args):
     logger.debug("Searching for media .(mkv|mp4|webm|ts|ogg) files")
 
-    regex = "(?i)\.(mkv|mp4|webm|ts|ogg)$"
+    regex = r"(?i)\.(mkv|mp4|webm|ts|ogg)$"
 
     if args.exclude_videos != None:
         with open(args.exclude_videos) as f:
@@ -104,34 +104,35 @@ def main(args):
 
         if args.exclude_mode == 'e+a' and args.exclude_subtitles != None:
             with open(args.exclude_subtitles, 'a') as f:
-                f.write("\n".join(files))
+                f.write("\n".join(output_filelist))
 
     else:
         files = get_media_filelist(args)
 
-        logger.info("Extracting subtitles...")
-        extractor = extract.SubtitleExtractor(
-            args.formats,
-            args.languages,
-            args.overwrite,
-            args.unknown_language_as,
-            not args.disable_bitmap_extraction
-        )
+        if len(files) > 0: 
+            logger.info("Extracting subtitles...")
+            extractor = extract.SubtitleExtractor(
+                args.formats,
+                args.languages,
+                args.overwrite,
+                args.unknown_language_as,
+                not args.disable_bitmap_extraction
+            )
 
-        output = run(args.threads, extractor.extract,
-                     files, args.disable_progress_bar)
-        output_filelist = list(chain.from_iterable(output))
+            output = run(args.threads, extractor.extract,
+                        files, args.disable_progress_bar)
+            output_filelist = list(chain.from_iterable(output))
 
-        if args.postprocessing != None:
-            logger.info("Postprocessing subtitles...")
-            postprocesser = postprocessing.SubtitleFormatter(
-                args.postprocessing)
-            run(args.threads, postprocesser.format,
-                output_filelist, args.disable_progress_bar)
+            if args.postprocessing != None:
+                logger.info("Postprocessing subtitles...")
+                postprocesser = postprocessing.SubtitleFormatter(
+                    args.postprocessing)
+                run(args.threads, postprocesser.format,
+                    output_filelist, args.disable_progress_bar)
 
-        if args.exclude_mode == 'e+a' and args.exclude_videos != None:
-            with open(args.exclude_videos, 'a') as f:
-                f.write("\n".join(files))
+            if args.exclude_mode == 'e+a' and args.exclude_videos != None:
+                with open(args.exclude_videos, 'a') as f:
+                    f.write("\n".join(files))
 
 
 if __name__ == '__main__':
@@ -161,11 +162,11 @@ if __name__ == '__main__':
     parser.add_argument(
         "--disable_progress_bar", help="enable progress bar", default=False, action='store_true')
     parser.add_argument(
-        "--exclude_videos", help="path to a newline separated file with paths to video files to exclude", type=str, default=None)
+        "--exclude_videos", help="path to a newline separated file with paths to video files to exclude (applied when --postprocess_only flag is NOT set)", type=str, default=None)
     parser.add_argument(
-        "--exclude_subtitles", help="path to a newline separated file with paths to subtitles files to exclude", type=str, default=None)
+        "--exclude_subtitles", help="path to a newline separated file with paths to subtitles files to exclude (applied only when --postprocess_only flag is set)", type=str, default=None)
     parser.add_argument(
-        "--exclude_mode", help="set file exclusion behavior, e = exclude only, e+a = exclude and append new extracted file", type=str, default='e', choices=['e', 'e+a'])
+        "--exclude_mode", help="set file exclusion behavior, e = exclude only, e+a = exclude and append newly processed file", type=str, default='e', choices=['e', 'e+a'])
     parser.add_argument(
         '--threads', help="set number of extraction threads", type=int, default=4)
 
