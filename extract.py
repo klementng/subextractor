@@ -209,8 +209,9 @@ class BaseSubtitleExtractor:
                 return True
 
             elif os.path.getsize(subtitle_path) == 0:
+                os.remove(subtitle_path)
                 logger.warning(
-                    f"[wanted] Not skipping. Empty subtitle file found (stream:{stream_index})")
+                    f"[wanted] Not skipping. Empty subtitle file found (stream:{stream_index}). Deleted file: {subtitle_path}")
                 return True
 
             else:
