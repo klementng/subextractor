@@ -2,7 +2,7 @@ services:
     
     subtitle-extract-test:
         build: .
-        command: /media --formats srt ass --languages eng --postprocessing ./postprocess.yml --scan_interval 30
+        command: /media --formats srt ass --languages eng --log_level DEBUG
         volumes:
             - ./tests/samples:/media
     

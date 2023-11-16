@@ -2,6 +2,7 @@ FROM python:3.11
 
 RUN apt update && \ 
     apt install -y \ 
+        ffmpeg \
         mkvtoolnix \ 
         tesseract-ocr \ 
         libgl1
