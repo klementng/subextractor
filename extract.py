@@ -7,10 +7,8 @@ import shutil
 import subprocess
 import tempfile
 
-import cachetools.func
-
 import cachetools
-
+import cachetools.func
 from babelfish import Language
 from pgsrip import Options, Sup, pgsrip
 
@@ -131,7 +129,7 @@ class BaseSubtitleExtractor:
 
         Returns:
             dict: A dictionary containing information of all subtitle stream from ffprobe.
-            
+
             Example
                 5: {"index": 5,
                     "codec_name": "subrip",
@@ -167,7 +165,6 @@ class BaseSubtitleExtractor:
             RuntimeError: A RuntimeError exception is raised if the command fails.
         """
 
-
         args = [
             'ffprobe',
             '-of', 'json', str(path),
@@ -187,7 +184,6 @@ class BaseSubtitleExtractor:
             info.setdefault(i, s)
 
         return info
-
 
     @classmethod
     def _run_ffmpeg(cls, path: str, args: list[str]) -> subprocess.CompletedProcess:
@@ -222,7 +218,7 @@ class BaseSubtitleExtractor:
         Returns:
             dict: subtitle information
         """
-        
+
         if path in self._sub_info_cache:
             self.log.debug("Using cached subtitle info")
             return self._sub_info_cache[path]
@@ -302,16 +298,16 @@ class BaseSubtitleExtractor:
     def format_subtitle_path(self, video_path: str, stream_index: int, subtitle_ext: str) -> str:
         """
         Get output path of extracted subtitle
-        
+
         Args:
-         	video_path (str): path to video file.
-         	stream_index (int): index of stream corresponding to subtitle stream in video file
-         	subtitle_ext (str): Extension to use for subtitle.
-         
+                video_path (str): path to video file.
+                stream_index (int): index of stream corresponding to subtitle stream in video file
+                subtitle_ext (str): Extension to use for subtitle.
+
         Returns: 
-         	str: output subtitle path
+                str: output subtitle path
         """
-        
+
         ffprobe_info = self.get_subtitle_info(video_path)
 
         pathlib_path: pathlib.Path = pathlib.Path(video_path)
@@ -320,7 +316,8 @@ class BaseSubtitleExtractor:
 
         # Format and remove illegal characters
         title = ffprobe_info[stream_index]['tags'].get("title")
-        title = f"{stream_index} - {title}" if title != None else str(stream_index)
+        title = f"{
+            stream_index} - {title}" if title != None else str(stream_index)
         title = re.sub(
             r"""NUL|[\/:*"<>|.%$^&£?]""",
             " - ",
@@ -353,7 +350,7 @@ class BitmapSubtitleExtractor(BaseSubtitleExtractor):
             parent.overwrite,
             parent.unknown_language_as
         )
-
+        obj._sub_info_cache = parent._sub_info_cache
         return obj
 
     def _run_psgrip_ocr(self, pgssub_path: str, srt_path: str, ocr_language: str):
@@ -365,7 +362,7 @@ class BitmapSubtitleExtractor(BaseSubtitleExtractor):
           pgssub_path(str): path to the input PGS subtitle (.sup) file 
           srt_path(str): path to the output SRT file
           ocr_language(str): iso language code used for performing OCR
-        
+
         Raises:
           RuntimeError: Failed Extraction
         """
@@ -443,7 +440,8 @@ class BitmapSubtitleExtractor(BaseSubtitleExtractor):
                 self.log.debug("Performing OCR. Converting .sup to .srt")
 
                 if lang == None:
-                    self.log.warning(f'Unable to do OCR on unknown subtitle language, skipping..stream:{i}')
+                    self.log.warning(
+                        f'Unable to do OCR on unknown subtitle language, skipping..stream:{i}')
                     continue
 
                 else:
@@ -482,11 +480,12 @@ class TextSubtitleExtractor(BaseSubtitleExtractor):
     @classmethod
     def init(cls, parent: BaseSubtitleExtractor):
         obj = cls(
-            parent.formats, 
+            parent.formats,
             parent.wanted_languages,
-            parent.overwrite, 
+            parent.overwrite,
             parent.unknown_language_as
         )
+        obj._sub_info_cache = parent._sub_info_cache
         return obj
 
     def extract(self, video_path: str, stream_indexes: list) -> list[str]:
@@ -501,7 +500,7 @@ class TextSubtitleExtractor(BaseSubtitleExtractor):
         """
 
         self.log.debug(
-            f"[TextSubtitleExtractor] Processing subtitles for {video_path}, streams: {stream_indexes}")
+            f"Processing subtitles for {video_path}, streams: {stream_indexes}")
 
         ffmpeg_args = []
         output_filepath = []
@@ -516,11 +515,11 @@ class TextSubtitleExtractor(BaseSubtitleExtractor):
                     output_filepath.append(f)
 
         if ffmpeg_args != []:
-            self.log.debug("[TextSubtitleExtractor] Extracting Subtitles...")
+            self.log.debug("Extracting Subtitles...")
             self._run_ffmpeg(video_path, ffmpeg_args)
         else:
             self.log.debug(
-                "[TextSubtitleExtractor] All desired format found, skipping...")
+                "All desired format found, skipping...")
 
         return output_filepath
 
@@ -552,7 +551,7 @@ class SubtitleExtractor(BaseSubtitleExtractor):
 
         for stream_i in ffprobe_info.keys():
 
-            if 'all' not in self.wanted_languages and ffprobe_info[stream_i].get('tags', {}).get('language') not in self.wanted_languages:
+            if 'all' not in self.wanted_languages and ffprobe_info[stream_i]['tags']['language'] not in self.wanted_languages:
                 continue
 
             elif ffprobe_info[stream_i]['codec_name'] in FFMPEG_TEXT_FORMATS:
@@ -564,20 +563,18 @@ class SubtitleExtractor(BaseSubtitleExtractor):
             else:
                 self.log.warning(
                     f"Subtitle format '{ffprobe_info[stream_i]['codec_name']}' is unsupported by ffmpeg. Skipping...")
-                
+
                 continue
 
         output_filepath = []
         if len(text_streams) != 0:
-            self.log.debug(
-                "Extracting text based subtitles")
+            self.log.debug("Extracting text based subtitles")
             extractor = TextSubtitleExtractor.init(self)
             filelist1 = extractor.extract(media_path, text_streams)
             output_filepath.extend(filelist1)
 
         if len(bitmap_streams) != 0 and self.extract_bitmap:
-            self.log.debug(
-                "Extracting bitmap based subtitles")
+            self.log.debug("Extracting bitmap based subtitles")
             extractor = BitmapSubtitleExtractor.init(self)
             filelist2 = extractor.extract(media_path, bitmap_streams)
             output_filepath.extend(filelist2)
