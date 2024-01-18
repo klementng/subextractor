@@ -1,8 +1,8 @@
 services:
     
-    subtitle-extract-test:
+    test:
         build: .
-        command: /media --formats srt ass --languages eng --log_level DEBUG
+        command: /media --formats srt ass --languages all --log_level DEBUG
         volumes:
             - ./tests/samples:/media
     
