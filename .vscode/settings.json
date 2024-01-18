@@ -9,5 +9,13 @@
         "*_test.py"
     ],
     "python.testing.pytestEnabled": false,
-    "python.testing.unittestEnabled": true
+    "python.testing.unittestEnabled": true,
+    "cSpell.words": [
+        "ffprobe",
+        "psgrip"
+    ],
+    "docify.commentService.docstringFormat": "Google",
+    "docify.commentService.sidePanelReviewMode": true,
+    "docify.translateService.docstringFormat": "Google",
+    "docify.translateService.sourceLanguage": "English"
 }
