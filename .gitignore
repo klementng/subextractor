@@ -169,3 +169,10 @@ tests/samples/text.7.ita.srt
 tests/samples/text.9.jpn.srt
 tests/samples/text.10.unknown.srt
 tests/samples/text.2.eng.ass
+tests/samples/text.3.hun.ass
+tests/samples/text.4.ger.ass
+tests/samples/text.5.fre.ass
+tests/samples/text.6.spa.ass
+tests/samples/text.7.ita.ass
+tests/samples/text.9.jpn.ass
+tests/samples/text.10.unknown.ass
