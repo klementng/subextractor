@@ -7,10 +7,6 @@ ass:
         - uses: info_action_save
           id: old_info
 
-    - selectors:
-        - uses: info_select_current_info
-
-      actions:
         - uses: info_action_update
           id: info
           with:
