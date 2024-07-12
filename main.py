@@ -22,15 +22,11 @@ def main(args):
 
         postprocesser = postprocessing.SubtitleFormatter(args.postprocessing)
 
-        output = run(
-            args.threads, postprocesser.format, files, args.disable_progress_bar
-        )
-
-        output_files = list(chain.from_iterable(output))
+        run(args.threads, postprocesser.format, files, args.disable_progress_bar)
 
         if args.exclude_mode == "e+a" and args.exclude_subtitles != None:
             with open(args.exclude_subtitles, "a") as f:
-                f.write("\n".join(output_files))
+                f.write("\n".join(files))
 
     else:
         files = get_video_filelist(args)

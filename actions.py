@@ -105,5 +105,8 @@ def events_action_regex_substitution(
     return event
 
 
-def events_action_delete(ssafile: SSAFile, event: SSAEvent, regex="", replace=""):
+def events_action_delete(ssafile: SSAFile, event: SSAEvent, **kwargs):
     ssafile.events.remove(event)
+
+def events_action_remove_miscellaneous_events(ssafile: SSAFile, event: SSAEvent, **kwargs):
+    ssafile.remove_miscellaneous_events()

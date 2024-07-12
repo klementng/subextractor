@@ -38,7 +38,6 @@ ass:
             x_new: "{{outputs['info'][0]['PlayResX']}}"
             y_new: "{{outputs['info'][0]['PlayResY']}}"
 
-
     - selectors:
         - uses: styles_select_top
       actions:
@@ -66,6 +65,8 @@ ass:
           with:
             regex: '{\\an\d}'
             replace: "[+] "
+        - uses: "events_action_remove_miscellaneous_events"
+
 srt:
   tasks:
     - selectors:
@@ -81,3 +82,5 @@ srt:
           with:
             regex: '{\\an\d}'
             replace: "[+] "
+
+        - uses: "events_action_remove_miscellaneous_events"

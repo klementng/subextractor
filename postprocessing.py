@@ -119,6 +119,7 @@ class SubtitleFormatter:
 
     def format(self, path, save=True):
         path = str(path)
+        print(path)
 
         if path.endswith(".ass"):
             self.log.debug(f"Formatting ass subtitle: {path}")
