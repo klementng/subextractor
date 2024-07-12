@@ -1,51 +1,83 @@
-# Using pysubs2
-
 ass:
-  general:
-    remove_miscellaneous_events: false
-    remove_duplicate_lines: false
-    remove_comments: false
-    remove_drawings: false
-  
-  replace:
-   - regex: ''
-     replacement: ''
+  tasks:
+    - selectors:
+        - uses: info_select_current_info
 
-  info:
-    # Remove the following keys (remove will occur first)
-    remove: []
+      actions:
+        - uses: info_action_save
+          id: old_info
 
-    # Update the following keys
-    update:
-      ScaledBorderAndShadow: 'yes'
-      
-  styles:
-    - regex: ".*" # apply to matching regex, ".*" is all styles 
-      mode: 'update' # update or replace
-      fontname: 'Arial'
-      borderstyle: 1
-      outline: 1
-      shadow: 1 
-      # will scaled accordingly if 'PlayResX' or 'PlayResY' is set 
-      fontsize: 50  #for 1920x1080 player
-      marginl: 30   #for 1920x1080 player
-      marginr: 30   #for 1920x1080 player
-      marginv: 50   #for 1920x1080 player
-  
+    - selectors:
+        - uses: info_select_current_info
 
-srt:  
-  general:
-    # if srt files contains ssa tags / converted from ass format
-    remove_miscellaneous_events: false # apl
-    remove_duplicate_lines: true
-    remove_comments: false
-    remove_drawings: false
-  
-  # Replace all positioning tags
-  replace:
-    - regex: '{\\an\d}'
-      replacement: '[+] '
-  
-  save:
-    keep_unknown_html_tags: false
-    keep_ssa_tags: false
+      actions:
+        - uses: info_action_update
+          id: info
+          with:
+            ScaledBorderAndShadow: "yes"
+            PlayResX: 1920
+            PlayResY: 1080
+
+    - selectors:
+        - uses: styles_select_all
+      actions:
+        - uses: styles_action_scale
+          with:
+            x_old: "{{outputs['old_info'][0]['PlayResX']}}"
+            y_old: "{{outputs['old_info'][0]['PlayResY']}}"
+            x_new: "{{outputs['info'][0]['PlayResX']}}"
+            y_new: "{{outputs['info'][0]['PlayResY']}}"
+
+    - selectors:
+        - uses: events_select_all
+      actions:
+        - uses: events_action_scale
+          with:
+            x_old: "{{outputs['old_info'][0]['PlayResX']}}"
+            y_old: "{{outputs['old_info'][0]['PlayResY']}}"
+            x_new: "{{outputs['info'][0]['PlayResX']}}"
+            y_new: "{{outputs['info'][0]['PlayResY']}}"
+
+
+    - selectors:
+        - uses: styles_select_top
+      actions:
+        - uses: styles_action_update
+          with:
+            fontname: "Arial"
+            borderstyle: 1
+            outline: 1
+            shadow: 1
+            fontsize: 50
+            marginl: 30
+            marginr: 30
+            marginv: 50
+
+    - selectors:
+        - uses: events_select_all
+
+      filters:
+        - uses: "events_filter_regex"
+          with:
+            regex: ".*"
+
+      actions:
+        - uses: "events_action_regex_substitution"
+          with:
+            regex: '{\\an\d}'
+            replace: "[+] "
+srt:
+  tasks:
+    - selectors:
+        - uses: events_select_all
+
+      filters:
+        - uses: "events_filter_regex"
+          with:
+            regex: ".*"
+
+      actions:
+        - uses: "events_action_regex_substitution"
+          with:
+            regex: '{\\an\d}'
+            replace: "[+] "

@@ -4,174 +4,131 @@ import re
 import logging
 import copy
 
+from pysubs2 import SSAFile
+
 logger = logging.getLogger(__name__)
 
+import actions as WORKFLOW_ACTIONS
 
-class BaseFormatter:
 
-    def __init__(self, config: dict) -> None:
+class SubtitleRunner:
 
-        self.config = config
-        self.general = config.get('general', {})
-        self.regex_replace = config.get("replace", [])
+    def __init__(self, workflows:list) -> None:
 
-        self.save_kwargs = config.get('save', {})
+        self.workflows = workflows
+        self.outputs = {}
 
-    def format_general(self, ssafile: pysubs2.SSAFile):
+    def validate_workflow(self):
+        pass
 
-        ssafile = copy.deepcopy(ssafile)
+    def _run_task(self, args, uses, kwargs: dict = {}):
+        func = getattr(WORKFLOW_ACTIONS, uses)
+        outputs = self.outputs
+        for k in kwargs.keys():
+            m = re.match(r"{{(.*)}}", str(kwargs[k]))
+            if m:
+                eval_str = m.group(1).strip()
+                kwargs[k] = eval(eval_str)
 
-        if self.general.get('remove_miscellaneous_events', False):
-            ssafile.remove_miscellaneous_events()
+        return func(*args, **kwargs)
 
-        rm_drawing = self.general.get('remove_drawings', False)
-        rm_dup = self.general.get("remove_duplicate_lines", False)
-        rm_comments = self.general.get('remove_comments', False)
+    def run_selector(self, ssafile: SSAFile, conf: dict):
+        id = conf.get("id")
+        func_name = conf["uses"]
+        kwargs = conf.get("with", {})
 
-        prev_event = pysubs2.SSAEvent()
+        out: list = self._run_task([ssafile], func_name, kwargs)
 
-        for i, event in reversed(list(enumerate(ssafile.events))):
+        if id is not None:
+            self.outputs[id] = out
 
-            if rm_comments and event.is_comment:
-                logger.debug(f"Removing comment line:{i}")
-                ssafile.events.pop(i)
+        return out
 
-            if rm_drawing and event.is_drawing:
-                logger.debug(f"Removing drawing line:{i}")
-                ssafile.events.pop(i)
+    def run_actions(self, ssafile: SSAFile, items: list, conf: dict):
+        id = conf.get("id")
+        func_name = conf["uses"]
+        kwargs = conf.get("with", {})
 
-            if rm_dup:
-                if event.start == prev_event.start and event.end == prev_event.end and event.plaintext == prev_event.plaintext:
-                    logger.debug(f"Removing duplicate line:{i}")
-                    ssafile.events.pop(i)
+        output = []
 
-            for r in self.regex_replace:
-                old = event.text
-                event.text = re.sub(r["regex"], r["replacement"], event.text)
+        for i in items:
+            out = self._run_task([ssafile, i], func_name, kwargs)
+            output.append(out)
 
-                if old != event.text:
-                    logger.debug(
-                        f"Performing regex ({r['regex']}) replacement for line:{i}")
+        if id is not None:
+            self.outputs[id] = output
 
-            prev_event = event
+        return output
 
-        return ssafile
+    def run_filter(self, ssafile: SSAFile, selections: list, conf: dict):
+        id = conf.get("id")
+        func_name = conf["uses"]
+        kwargs = conf.get("with", {})
 
-    def format(self, path, save=False):
+        out = [
+            item
+            for item in selections
+            if self._run_task([ssafile, item], func_name, kwargs)
+        ]
+
+        if id is not None:
+            self.outputs[id] = out
+
+        return out
+
+    def run_workflow(self, ssafile):
+
+        for task in self.workflows:
+
+            selections = []
+            selectors = task.get("selectors", [])
+            filters = task.get("filter", [])
+            actions = task.get("actions", [])
+
+            for s_conf in selectors:
+                out = self.run_selector(ssafile, s_conf)
+                selections.extend(out)
+
+            for f_conf in filters:
+                selections = self.run_filter(ssafile, selections, f_conf)
+
+            for a_conf in actions:
+                output = self.run_actions(ssafile, selections, a_conf)
+
+    def format(self, path, save=True):
         ssafile = pysubs2.load(path)
 
-        ssafile = self.format_general(ssafile)
+        self.run_workflow(ssafile)
 
         if save == True:
-            ssafile.save(path, **self.save_kwargs)
+            ssafile.save(path)
 
         return ssafile
 
 
-class SSAFormatter(BaseFormatter):
+class SubtitleFormatter:
 
-    def __init__(self, config: dict) -> None:
-        super().__init__(config)
+    def __init__(self, config_path: str) -> None:
+        self.log = logging.getLogger("SubtitleFormatter")
 
-        self.info = config.get("info", {})
-        self.styles = config.get("styles", [])
-
-    def update_info(self, ssafile: pysubs2.SSAFile):
-
-        ssafile = copy.deepcopy(ssafile)
-
-        remove = self.info.get("remove", [])
-        update = self.info.get("update", {})
-
-        for key in remove:
-            ssafile.info.pop(key, None)
-
-        ssafile.info.update(update)
-
-        return ssafile
-
-    def format_ssa_styles(self, ssafile):
-
-        ssafile = copy.deepcopy(ssafile)
-
-        ssafile.info.setdefault("PlayResX", '1920')
-        ssafile.info.setdefault("PlayResY", '1080')
-
-        for key in ssafile.styles.keys():
-
-            for sty in self.styles:
-                sty_copy = sty.copy()
-
-                match_regex = sty_copy.pop("regex")
-                mode = sty_copy.pop("mode")
-
-                if "fontsize" in sty_copy:
-                    sty_copy["fontsize"] = round(
-                        sty_copy["fontsize"] / 1080 * float(ssafile.info["PlayResY"]), 1)
-
-                if "marginv" in sty_copy:
-                    sty_copy["marginv"] = int(
-                        round(sty_copy["marginv"] / 1080 * float(ssafile.info["PlayResY"])))
-
-                if "marginl" in sty_copy:
-                    sty_copy["marginl"] = int(
-                        round(sty_copy["marginl"] / 1920 * float(ssafile.info["PlayResX"])))
-
-                if "marginr" in sty_copy:
-                    sty_copy["marginr"] = int(
-                        round(sty_copy["marginr"] / 1920 * float(ssafile.info["PlayResX"])))
-
-                if re.fullmatch(match_regex, str(key)) != None:
-
-                    if mode == 'replace':
-                        logger.debug(f"Replacing style: {key}")
-                        ssafile.styles[key] = pysubs2.SSAStyle(**sty_copy)
-
-                    elif mode == 'update':
-                        logger.debug(f"Updating style: {key}")
-                        ssafile.styles[key].__dict__.update(sty_copy)
-                    else:
-                        logger.critical(f"'{mode}' mode is not Supported")
-
-        return ssafile
-
-    def format(self, path, save=False):
-        ssafile = pysubs2.load(path)
-
-        ssafile = self.update_info(ssafile)
-        ssafile = self.format_general(ssafile)
-        ssafile = self.format_ssa_styles(ssafile)
-
-        if save == True:
-            ssafile.save(path, **self.save_kwargs)
-
-        return ssafile
-
-
-class SRTFormatter(BaseFormatter):
-
-    def __init__(self, config: dict) -> None:
-        super().__init__(config)
-
-
-class SubtitleFormatter(BaseFormatter):
-
-    def __init__(self, config_path:str) -> None:
         with open(config_path) as cfg_file:
-            self.config = yaml.full_load(cfg_file.read())
-    
-    def format(self,path):
-        if str(path).endswith(".ass"):
-            logger.debug(f"[PostProcessing] Formatting ass subtitle: {path}")
-            formatter = SSAFormatter(self.config['ass'])
-            formatter.format(path, save=True)
+            self.config: dict = yaml.safe_load(cfg_file.read())
 
-        elif str(path).endswith(".srt") or str(path).endswith(".vtt"):
-            logger.debug(f"[PostProcessing] Formatting srt subtitle: {path}")
-            formatter = SRTFormatter(self.config['srt'])
-            formatter.format(path, save=True)
+        self.ass_formatter = SubtitleRunner(self.config["ass"]["tasks"])
+        self.srt_formatter = SubtitleRunner(self.config["srt"]["tasks"])
+
+    def format(self, path, save=True):
+        path = str(path)
+
+        if path.endswith(".ass"):
+            self.log.debug(f"Formatting ass subtitle: {path}")
+            return self.ass_formatter.format(path, save=save)
+
+        elif path.endswith(".srt") or path.endswith(".vtt"):
+            self.log.debug(f"Formatting srt/vtt subtitle: {path}")
+            return self.srt_formatter.format(path, save=save)
 
         else:
-            logger.warning("[PostProcessing] Unsupported format")
-        
-        return path
+            logger.warning("Unsupported format, skipping...")
+
+            return None
