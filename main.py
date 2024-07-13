@@ -22,7 +22,7 @@ def postprocess_subtitles(files, args, pp_args):
     run(args.threads, postprocesser.format, files, args.disable_progress_bar)
 
     if args.exclude_mode == "e+a" and pp_args.exclude_subtitles != None:
-        with open(args.exclude_subtitles, "a") as f:
+        with open(pp_args.exclude_subtitles, "a") as f:
             f.write("\n".join(files))
 
     return files
@@ -43,7 +43,7 @@ def extract_subtitles(files, args, vid_args):
     output_files = list(chain.from_iterable(output))
 
     if args.exclude_mode == "e+a" and vid_args.exclude_videos != None:
-        with open(args.exclude_videos, "a") as f:
+        with open(vid_args.exclude_videos, "a") as f:
             f.write("\n".join(output_files))
 
     return output_files
