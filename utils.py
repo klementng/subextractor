@@ -16,9 +16,9 @@ logger = logging.getLogger(__name__)
 
 
 def run(threads, function, files, disable_progress_bar=False):
+    run_output = []
 
     with tqdm(total=len(files), unit="file", disable=disable_progress_bar) as pbar:
-        run_output = []
 
         def _run_callback(out):
             nonlocal run_output
@@ -28,7 +28,7 @@ def run(threads, function, files, disable_progress_bar=False):
 
         def _error_callback(e):
             logger.critical(
-                f"An Error occurred in thread...: {''.join(traceback.format_exception(e))}"
+                f"An Error occurred in thread {e}...: {''.join(traceback.format_exception(e))}"
             )
 
         with multiprocessing.Pool(threads) as pool:
@@ -43,7 +43,7 @@ def run(threads, function, files, disable_progress_bar=False):
             pool.close()
             pool.join()
 
-        return run_output
+    return run_output
 
 
 def get_filelist(path, regex, excluded_files=[]):
