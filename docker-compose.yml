@@ -1,19 +1,23 @@
 services:
-    
-    test:
-        build: .
-        command: /media --formats srt ass --languages all --log_level DEBUG
-        volumes:
-            - ./tests/samples:/media
-    
-    #sample config
     subtitle-extract:
-        image: ghcr.io/klementng/subtitle-extract:main
+        image: ghcr.io/klementng/subtitle-extract:latest
         container_name: subtitle-extract
         user: 1000:1000
         environment:
             - TZ=Etc/UTC
         volumes:
             - /path/to/media:/media
-        command: /media --formats srt ass --languages eng --postprocessing ./postprocess.yml --scan_interval 30
+        command: >- 
+            full /media  
+            --log_level INFO 
+            --scan_interval 30
+            --exclude_mode e+a
+
+            --output_formats srt ass 
+            --languages eng
+            --exclude_videos /config/exclude-video.txt
+            
+            --postprocessing ./postprocess.yml 
+            --exclude_subtitles /config/exclude-subtitles.txt 
+        
         restart: unless-stopped
