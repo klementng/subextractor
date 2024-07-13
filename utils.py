@@ -35,7 +35,7 @@ def run(threads, function, files, disable_progress_bar=False):
                     function,
                     args=(fp,),
                     callback=_run_callback,
-                    error_callback=_error_callback,
+                    # error_callback=_error_callback,
                 )
 
             pool.close()

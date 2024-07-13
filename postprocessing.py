@@ -145,5 +145,4 @@ class SubtitleFormatter:
                 return path
 
         else:
-            logger.critical("Unsupported format, skipping...")
-            raise ValueError(f"File cannot be formatted: {path}")
+            raise ValueError(f"Unsupported format: {path}")
