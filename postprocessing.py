@@ -13,7 +13,7 @@ import actions as WORKFLOW_ACTIONS
 
 class SubtitleRunner:
 
-    def __init__(self, workflows:list) -> None:
+    def __init__(self, workflows: list) -> None:
 
         self.workflows = workflows
         self.outputs = {}
@@ -44,22 +44,6 @@ class SubtitleRunner:
 
         return out
 
-    def run_actions(self, ssafile: SSAFile, items: list, conf: dict):
-        id = conf.get("id")
-        func_name = conf["uses"]
-        kwargs = conf.get("with", {})
-
-        output = []
-
-        for i in items:
-            out = self._run_task([ssafile, i], func_name, kwargs)
-            output.append(out)
-
-        if id is not None:
-            self.outputs[id] = output
-
-        return output
-
     def run_filter(self, ssafile: SSAFile, selections: list, conf: dict):
         id = conf.get("id")
         func_name = conf["uses"]
@@ -76,6 +60,34 @@ class SubtitleRunner:
 
         return out
 
+    def run_actions(self, ssafile: SSAFile, items: list, conf: dict):
+        id = conf.get("id")
+        func_name = conf["uses"]
+        kwargs = conf.get("with", {})
+
+        output = []
+
+        for i in items:
+            out = self._run_task([ssafile, i], func_name, kwargs)
+            output.append(out)
+
+        if id is not None:
+            self.outputs[id] = output
+
+        return output
+
+    def run_misc(self, ssafile: SSAFile, conf: dict):
+        id = conf.get("id")
+        func_name = conf["uses"]
+        kwargs = conf.get("with", {})
+
+        out = self._run_task([ssafile], func_name, kwargs)
+
+        if id is not None:
+            self.outputs[id] = out
+
+        return out
+
     def run_workflow(self, ssafile):
 
         for task in self.workflows:
@@ -84,6 +96,7 @@ class SubtitleRunner:
             selectors = task.get("selectors", [])
             filters = task.get("filter", [])
             actions = task.get("actions", [])
+            misc = task.get("misc", [])
 
             for s_conf in selectors:
                 out = self.run_selector(ssafile, s_conf)
@@ -93,7 +106,10 @@ class SubtitleRunner:
                 selections = self.run_filter(ssafile, selections, f_conf)
 
             for a_conf in actions:
-                output = self.run_actions(ssafile, selections, a_conf)
+                self.run_actions(ssafile, selections, a_conf)
+
+            for e_conf in misc:
+                self.run_misc(ssafile, e_conf)
 
     def format(self, path, save=True):
         ssafile = pysubs2.load(path)
@@ -114,22 +130,19 @@ class SubtitleFormatter:
         with open(config_path) as cfg_file:
             self.config: dict = yaml.safe_load(cfg_file.read())
 
-        self.ass_formatter = SubtitleRunner(self.config["ass"]["tasks"])
-        self.srt_formatter = SubtitleRunner(self.config["srt"]["tasks"])
+        self.workflows = {fmt: self.config[fmt]["tasks"] for fmt in self.config}
 
     def format(self, path, save=True):
         path = str(path)
-        print(path)
 
-        if path.endswith(".ass"):
-            self.log.debug(f"Formatting ass subtitle: {path}")
-            return self.ass_formatter.format(path, save=save)
+        for ext in self.workflows:
 
-        elif path.endswith(".srt") or path.endswith(".vtt"):
-            self.log.debug(f"Formatting srt/vtt subtitle: {path}")
-            return self.srt_formatter.format(path, save=save)
+            if path.endswith(f".{ext}"):
+                runner = SubtitleRunner(self.workflows[ext])
+                self.log.debug(f"Formatting subtitle: {path}")
+
+                return runner.format(path, save=save)
 
         else:
             logger.warning("Unsupported format, skipping...")
-
             return None

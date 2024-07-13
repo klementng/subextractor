@@ -11,16 +11,12 @@ from itertools import chain
 from tqdm_loggable.auto import tqdm
 from tqdm_loggable.tqdm_logging import tqdm_logging
 
-import extract
-import postprocessing
-
 logger = logging.getLogger(__name__)
-
 
 
 def run(threads, function, files, disable_progress_bar=False):
 
-    with tqdm(total=len(files), unit='file', disable=disable_progress_bar) as pbar:
+    with tqdm(total=len(files), unit="file", disable=disable_progress_bar) as pbar:
         run_output = []
 
         def _run_callback(out):
@@ -39,58 +35,59 @@ def run(threads, function, files, disable_progress_bar=False):
                     function,
                     args=(files[i],),
                     callback=_run_callback,
-                    error_callback=_error_callback
+                    error_callback=_error_callback,
                 )
             pool.close()
             pool.join()
 
         return run_output
-    
-    
+
+
 def get_filelist(path, regex, excluded_files=[]):
     files = []
 
     if os.path.isdir(path):
-        logger.info(f"Scanning directories...")
-        for f in glob.iglob(path + '**/**', recursive=True):
+        for f in glob.iglob(path + "**/**", recursive=True):
             if re.search(regex, f) and f not in excluded_files and f not in files:
                 files.append(f)
     else:
         files = [path]
 
     logger.info(
-        f"Found {len(files)} files to be processed, {len(excluded_files)} excluded")
+        f"Found {len(files)} files to be processed, {len(excluded_files)} excluded"
+    )
 
     return files
 
 
-def get_subtitles_filelist(args):
-    logger.info("Searching for subtitles files")
+def get_subtitles_filelist(path, formats=["srt", "ass", "vtt"], exclude_filepath=None):
 
-    if 'all' not in args.languages:
-        regex = f"(?i)\\.({'|'.join(args.languages)})\\.({
-            '|'.join(args.formats)})$"
-    else:
-        regex = f"(?i)\\.({'|'.join(args.formats)})$"
+    fom = "|".join(formats)
+    logger.info(f"Searching for subtitles files that end with {fom}")
 
-    if args.exclude_subtitles != None:
-        with open(args.exclude_subtitles) as f:
+    regex = "(?i)\\.({})$".format(fom)
+
+    if exclude_filepath != None:
+        with open(exclude_filepath) as f:
             excluded_files = f.read().splitlines()
     else:
         excluded_files = []
 
-    return get_filelist(args.path, regex, excluded_files)
+    return get_filelist(path, regex, excluded_files)
 
 
-def get_video_filelist(args):
-    logger.info("Searching for video .(mkv|mp4|webm|ts|ogg) files")
+def get_video_filelist(
+    path, formats=["mkv", "mp4", "webm", "ts", "ogg"], exclude_filepath=None
+):
+    fom = "|".join(formats)
+    logger.info(f"Searching for video {fom} files")
 
-    regex = r"(?i)\.(mkv|mp4|webm|ts|ogg)$"
+    regex = "(?i)\\.({})$".format(fom)
 
-    if args.exclude_videos != None:
-        with open(args.exclude_videos) as f:
+    if exclude_filepath != None:
+        with open(exclude_filepath) as f:
             excluded_files = f.read().splitlines()
     else:
         excluded_files = []
 
-    return get_filelist(args.path, regex, excluded_files)
+    return get_filelist(path, regex, excluded_files)

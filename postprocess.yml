@@ -25,16 +25,6 @@ ass:
             y_new: "{{outputs['info'][0]['PlayResY']}}"
 
     - selectors:
-        - uses: events_select_all
-      actions:
-        - uses: events_action_scale
-          with:
-            x_old: "{{outputs['old_info'][0]['PlayResX']}}"
-            y_old: "{{outputs['old_info'][0]['PlayResY']}}"
-            x_new: "{{outputs['info'][0]['PlayResX']}}"
-            y_new: "{{outputs['info'][0]['PlayResY']}}"
-
-    - selectors:
         - uses: styles_select_top
       actions:
         - uses: styles_action_update
@@ -43,7 +33,7 @@ ass:
             borderstyle: 1
             outline: 1
             shadow: 1
-            fontsize: 50
+            fontsize: 60
             marginl: 30
             marginr: 30
             marginv: 50
@@ -51,17 +41,16 @@ ass:
     - selectors:
         - uses: events_select_all
 
-      filters:
-        - uses: "events_filter_regex"
-          with:
-            regex: ".*"
-
       actions:
-        - uses: "events_action_regex_substitution"
+        - uses: events_action_scale
           with:
-            regex: '{\\an\d}'
-            replace: "[+] "
-        - uses: "events_action_remove_miscellaneous_events"
+            x_old: "{{outputs['old_info'][0]['PlayResX']}}"
+            y_old: "{{outputs['old_info'][0]['PlayResY']}}"
+            x_new: "{{outputs['info'][0]['PlayResX']}}"
+            y_new: "{{outputs['info'][0]['PlayResY']}}"
+
+    - misc:
+        - uses: "events_misc_remove_miscellaneous_events"
 
 srt:
   tasks:
@@ -79,4 +68,5 @@ srt:
             regex: '{\\an\d}'
             replace: "[+] "
 
-        - uses: "events_action_remove_miscellaneous_events"
+    - misc:
+        - uses: "events_misc_remove_miscellaneous_events"
