@@ -6,6 +6,7 @@ import multiprocessing
 import os
 import re
 import time
+import traceback
 from itertools import chain
 
 from tqdm_loggable.auto import tqdm
@@ -26,7 +27,9 @@ def run(threads, function, files, disable_progress_bar=False):
             run_output.append(out)
 
         def _error_callback(e):
-            logger.critical(f"An Error occurred in thread...: {e}")
+            logger.critical(
+                f"An Error occurred in thread...: {''.join(traceback.format_exception(e))}"
+            )
 
         with multiprocessing.Pool(threads) as pool:
 
