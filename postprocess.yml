@@ -1,3 +1,18 @@
+# DEFINING A TASK:
+# Order of operation:
+#   1) selectors: Select objects to be processed
+#      - func(ssafile, **kwargs) -> obj
+#   2) filter: filter out object from selectors
+#      - func(ssafile, item, **kwargs) -> bool
+#   3) actions: run actions for each item that was selected
+#      - func(ssafile, item, **kwargs) -> output
+#   4) run misc function
+#      - func(ssafile,**kwargs) -> output
+#
+#  defining id saves the output of an action to a dict: outputs
+#  the value can be accessed using: {{outputs['id'][0]['PlayResX']}}
+#
+
 ass:
   tasks:
     - selectors:
