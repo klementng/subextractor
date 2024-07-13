@@ -3,5 +3,5 @@ cachetools==5.3.0
 pgsrip==0.1.9
 pysubs2==1.6.1
 PyYAML==6.0.1
-tqdm_loggable==0.1.4
+tqdm_loggable==0.2
 watchdog==4.0.1
