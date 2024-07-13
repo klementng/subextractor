@@ -23,13 +23,19 @@ def run(threads, function, files, disable_progress_bar=False):
         output = []
 
         def _run_callback(result):
+            nonlocal pbar
+            nonlocal output
+
             pbar.update(1)
             output.append(result)
 
-        # def _error_callback(error):
-        #     pbar.update(1)
-        #     logger.critical(f"An error occurred in thread....")
-        #     traceback.print_exception(type(error), error, error.__traceback__)
+        def _error_callback(error):
+            nonlocal pbar
+            nonlocal output
+
+            pbar.update(1)
+            logger.critical(f"An error occurred in thread....")
+            traceback.print_exception(type(error), error, error.__traceback__)
 
         with multiprocessing.Pool(threads) as pool:
             for fp in files:
@@ -37,7 +43,7 @@ def run(threads, function, files, disable_progress_bar=False):
                     function,
                     args=(fp,),
                     callback=_run_callback,
-                    # error_callback=_error_callback,
+                    error_callback=_error_callback,
                 )
 
             pool.close()
