@@ -141,8 +141,9 @@ class SubtitleFormatter:
                 runner = SubtitleRunner(self.workflows[ext])
                 self.log.debug(f"Formatting subtitle: {path}")
 
-                return runner.format(path, save=save)
+                runner.format(path, save=save)
+                return path
 
         else:
-            logger.warning("Unsupported format, skipping...")
-            return None
+            logger.critical("Unsupported format, skipping...")
+            raise ValueError(f"File cannot be formatted: {path}")

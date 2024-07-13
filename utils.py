@@ -34,6 +34,7 @@ def run(threads, function, files, disable_progress_bar=False):
         with multiprocessing.Pool(threads) as pool:
 
             for i in range(pbar.total):
+
                 pool.apply_async(
                     function,
                     args=(files[i],),

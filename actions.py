@@ -109,7 +109,5 @@ def events_action_delete(ssafile: SSAFile, event: SSAEvent, **kwargs):
     ssafile.events.remove(event)
 
 
-def events_misc_remove_miscellaneous_events(
-    ssafile: SSAFile, **kwargs
-):
+def events_misc_remove_miscellaneous_events(ssafile: SSAFile, **kwargs):
     ssafile.remove_miscellaneous_events()

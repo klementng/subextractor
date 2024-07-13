@@ -19,13 +19,14 @@ def postprocess_subtitles(files, args, pp_args):
 
     postprocesser = postprocessing.SubtitleFormatter(pp_args.postprocessing)
 
-    run(args.threads, postprocesser.format, files, args.disable_progress_bar)
+    output = run(args.threads, postprocesser.format, files, args.disable_progress_bar)
+    output_files = list(chain.from_iterable(output))
 
     if args.exclude_mode == "e+a" and pp_args.exclude_subtitles != None:
         with open(pp_args.exclude_subtitles, "a") as f:
-            f.write("\n".join(files))
+            f.write("\n".join(output_files))
 
-    return files
+    return output_files
 
 
 def extract_subtitles(files, args, vid_args):
