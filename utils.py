@@ -17,35 +17,31 @@ logger = logging.getLogger(__name__)
 
 def run(threads, function, files, disable_progress_bar=False):
 
-    def worker(*args, **kwargs):
-        try:
-            return function(*args, **kwargs)
-        except Exception as e:
-            logger.critical("An error occurred in a worker thread", exc_info=True)
-
-        return None
-
-    run_output = []
+    output = []
 
     with tqdm(total=len(files), unit="file", disable=disable_progress_bar) as pbar:
 
-        def _run_callback(out):
-            nonlocal run_output
-            nonlocal pbar
+        def _run_callback(result):
             pbar.update(1)
+            output.append(result)
 
-            if out is not None:
-                run_output.append(out)
+        def _error_callback(error):
+            logger.critical(f"An error occurred in thread....")
+            traceback.print_exception(type(error), error, error.__traceback__)
 
         with multiprocessing.Pool(threads) as pool:
-
-            for i in range(pbar.total):
-                pool.apply_async(worker, args=(files[i],), callback=_run_callback)
+            for fp in files:
+                pool.apply_async(
+                    function,
+                    args=(fp,),
+                    callback=_run_callback,
+                    error_callback=_error_callback,
+                )
 
             pool.close()
             pool.join()
 
-    return run_output
+    return output
 
 
 def get_filelist(path, regex, excluded_files=[]):
