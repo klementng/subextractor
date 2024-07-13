@@ -30,7 +30,8 @@ def run(threads, function, files, disable_progress_bar=False):
             logger.critical(
                 f"An Error occurred in thread {e}...: {''.join(traceback.format_exception(e))}"
             )
-
+            pbar.update(1)
+        
         with multiprocessing.Pool(threads) as pool:
 
             for i in range(pbar.total):
