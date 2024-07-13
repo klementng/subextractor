@@ -1,4 +1,4 @@
-babelfish==0.6.0
+babelfish==0.6.1
 cachetools==5.3.3
 pgsrip==0.1.9
 pysubs2==1.7.2
