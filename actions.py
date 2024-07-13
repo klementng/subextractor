@@ -62,7 +62,7 @@ def events_action_scale(ssafile: SSAFile, event: SSAEvent, **kwargs):
     return event
 
 
-def styles_action_update(ssafile: SSAFile, style: SSAStyle, **kwargs):
+def styles_action_update_properties(ssafile: SSAFile, style: SSAStyle, **kwargs):
     style.__dict__.update(kwargs)
 
     return style
@@ -107,6 +107,12 @@ def events_action_regex_substitution(
 
 def events_action_delete(ssafile: SSAFile, event: SSAEvent, **kwargs):
     ssafile.events.remove(event)
+    return event
+
+
+def events_action_update_properties(ssafile: SSAFile, event: SSAEvent, **kwargs):
+    event.__dict__.update(kwargs)
+    return event
 
 
 def events_misc_remove_miscellaneous_events(ssafile: SSAFile, **kwargs):

@@ -1,7 +1,7 @@
 # DEFINING A TASK:
 # Order of operation:
 #   1) selectors: Select objects to be processed
-#      - func(ssafile, **kwargs) -> obj
+#      - func(ssafile, **kwargs) -> list[obj]
 #   2) filter: filter out object from selectors
 #      - func(ssafile, item, **kwargs) -> bool
 #   3) actions: run actions for each item that was selected
@@ -12,9 +12,12 @@
 #  defining id saves the output of an action to a dict: outputs
 #  the value can be accessed using: {{outputs['id'][0]['PlayResX']}}
 #
+#
+# SEE actions.py for list of actions
 
 ass:
   tasks:
+    # Save some information
     - selectors:
         - uses: info_select_current_info
 
@@ -29,9 +32,11 @@ ass:
             PlayResX: 1920
             PlayResY: 1080
 
+    #### Modify styling information ####
     - selectors:
         - uses: styles_select_all
       actions:
+        # Scales Existing font / margins with new player resolution
         - uses: styles_action_scale
           with:
             x_old: "{{outputs['old_info'][0]['PlayResX']}}"
@@ -39,10 +44,16 @@ ass:
             x_new: "{{outputs['info'][0]['PlayResX']}}"
             y_new: "{{outputs['info'][0]['PlayResY']}}"
 
+        #  Force all font to use arial format
+        - uses: styles_action_update_properties
+          with:
+            fontname: "Arial"
+
+    #  Select the main style (i.e. most used style) and give the following styling format
     - selectors:
         - uses: styles_select_top
       actions:
-        - uses: styles_action_update
+        - uses: styles_action_update_properties
           with:
             fontname: "Arial"
             borderstyle: 1
@@ -53,6 +64,7 @@ ass:
             marginr: 30
             marginv: 50
 
+    # Scales Existing inline margins with new player resolution
     - selectors:
         - uses: events_select_all
 
@@ -64,6 +76,7 @@ ass:
             x_new: "{{outputs['info'][0]['PlayResX']}}"
             y_new: "{{outputs['info'][0]['PlayResY']}}"
 
+    # run ssafile.remove_miscellaneous_events()
     - misc:
         - uses: "events_misc_remove_miscellaneous_events"
 
@@ -77,6 +90,7 @@ srt:
           with:
             regex: ".*"
 
+      # replace positioning tags left behind by FFMPEG when extracting/converting subtitles
       actions:
         - uses: "events_action_regex_substitution"
           with:
