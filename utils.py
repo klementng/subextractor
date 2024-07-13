@@ -18,20 +18,9 @@ logger = logging.getLogger(__name__)
 
 def run(threads, function, files, disable_progress_bar=False):
 
-    output = []
-
     with tqdm(total=len(files), unit="file", disable=disable_progress_bar) as pbar:
 
-        def worker(func):
-
-            @functools.wraps(func)
-            def wrapped_func(*args, **kwargs):
-                try:
-                    return func(*args, **kwargs)
-                except:
-                    logger.critical(f"An error occurred in thread....", exc_info=True)
-
-            return wrapped_func
+        output = []
 
         def _run_callback(result):
             pbar.update(1)
@@ -45,7 +34,7 @@ def run(threads, function, files, disable_progress_bar=False):
         with multiprocessing.Pool(threads) as pool:
             for fp in files:
                 pool.apply_async(
-                    worker(function),
+                    function,
                     args=(fp,),
                     callback=_run_callback,
                     # error_callback=_error_callback,
@@ -54,7 +43,7 @@ def run(threads, function, files, disable_progress_bar=False):
             pool.close()
             pool.join()
 
-    return output
+        return output
 
 
 def get_filelist(path, regex, excluded_files=[]):
