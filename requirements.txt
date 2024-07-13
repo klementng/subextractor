@@ -1,6 +1,6 @@
 babelfish==0.6.1
 cachetools==5.3.3
-pgsrip==0.1.9
+pgsrip==0.1.11
 pysubs2==1.7.2
 PyYAML==6.0.1
 tqdm_loggable==0.2
