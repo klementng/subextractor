@@ -8,6 +8,7 @@ import re
 import time
 import traceback
 from itertools import chain
+import functools
 
 from tqdm_loggable.auto import tqdm
 from tqdm_loggable.tqdm_logging import tqdm_logging
@@ -21,18 +22,30 @@ def run(threads, function, files, disable_progress_bar=False):
 
     with tqdm(total=len(files), unit="file", disable=disable_progress_bar) as pbar:
 
+        def worker(func):
+
+            @functools.wraps(func)
+            def wrapped_func(*args, **kwargs):
+                try:
+                    return func(*args, **kwargs)
+                except:
+                    logger.critical(f"An error occurred in thread....", exc_info=True)
+
+            return wrapped_func
+
         def _run_callback(result):
             pbar.update(1)
             output.append(result)
 
-        def _error_callback(error):
-            logger.critical(f"An error occurred in thread....")
-            traceback.print_exception(type(error), error, error.__traceback__)
+        # def _error_callback(error):
+        #     pbar.update(1)
+        #     logger.critical(f"An error occurred in thread....")
+        #     traceback.print_exception(type(error), error, error.__traceback__)
 
         with multiprocessing.Pool(threads) as pool:
             for fp in files:
                 pool.apply_async(
-                    function,
+                    worker(function),
                     args=(fp,),
                     callback=_run_callback,
                     # error_callback=_error_callback,
