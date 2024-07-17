@@ -5,17 +5,54 @@
 
 ## About The Project
 
-Extract text and image based subtitles from media files using ffmpeg.
+This Python script extracts both text and image-based subtitles from media files and saves them as .ass, .srt, or .vtt subtitle files. Additionally, it includes a customizable post-processor that standardizes the styling of .ass subtitles while retaining their original positioning.
 
-## Installation
+## How It Works
 
-see [docker-compose.yml](./docker-compose.yml)
+In summary:
 
-## Usage
+- `run script --> subtitle files --> postprocess --> output`
 
-### Extract only mode
+### Extraction
 
-To extract subtitles only
+The extraction process first uses `ffprobe` to identify all available subtitle streams. Once identified, the `ffmpeg` command is executed to extract the desired subtitle streams into the specified formats.
+
+For image-based subtitles, the subtitle stream is converted into .sup format, and OCR is performed using [pgsrip](https://pypi.org/project/pgsrip/) which uses `tesseract-ocr` to transcribe the subtitles into a .srt file. The .srt file is then converted into the desired formats.
+
+### Postprocessing
+
+Once the extraction is complete, the tool runs a postprocessor that edits the subtitle files using the [pysubs2](https://pypi.org/project/pysubs2/) package. The tool executes a default workflow defined in [postprocess.yml](./postprocess.yml) or a custom workflow.
+
+## Installation / Usage
+
+### Docker Run
+
+To use the script via Docker run:
+
+## Installation / Usages
+
+### Docker run
+
+Usage via docker run
+
+```
+docker run -v /PATH/TO/MEDIA/DIR:/media -it --rm ghcr.io/klementng/subtitle-extract:latest full /media [options]
+```
+
+### Docker compose
+
+Used for watch directory for changes
+
+- see [docker-compose.yml](./docker-compose.yml) for sample configuration
+
+## Options
+
+### Extract mode
+
+Extract subtitles mode options:
+
+<details>
+  <summary>Show options</summary>
 
 ```sh
 usage: main.py [-h] [--threads THREADS] [--scan_interval SCAN_INTERVAL] [--disable_progress_bar] [--exclude_mode {e,e+a}] [--log_level LOG_LEVEL] [--log_file LOG_FILE]
@@ -55,9 +92,14 @@ options:
                         path to a newline separated file with paths to video files to exclude
 ```
 
-### Format only mode
+</details>
 
-To format / postprocessing of subtitles
+### Format options
+
+Format / postprocessing of subtitles options:
+
+<details>
+  <summary>Show options</summary>
 
 ```sh
 usage: main.py [-h] [--threads THREADS] [--scan_interval SCAN_INTERVAL] [--disable_progress_bar] [--exclude_mode {e,e+a}] [--log_level LOG_LEVEL]
@@ -88,3 +130,9 @@ options:
   --exclude_subtitles EXCLUDE_SUBTITLES
                         path to a newline separated file with paths to subtitles files to exclude
 ```
+
+</details>
+
+## Postprocesser
+
+To change styling of the ssa subtitle file, the [postprocess.yml](./postprocess.yml) file can be edited.
