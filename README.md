@@ -21,15 +21,9 @@ For image-based subtitles, the subtitle stream is converted into .sup format, an
 
 ### Postprocessing
 
-Once the extraction is complete, the tool runs a postprocessor that edits the subtitle files using the [pysubs2](https://pypi.org/project/pysubs2/) package. The tool executes a default workflow defined in [postprocess.yml](./postprocess.yml) or a custom workflow.
+Once the extraction is complete, the tool runs a postprocessor that edits the subtitle files using the [pysubs2](https://pypi.org/project/pysubs2/) package. The tool executes a default workflow defined in [postprocess.yml](./postprocess.yml) (or a custom defined workflow).
 
 ## Installation / Usage
-
-### Docker Run
-
-To use the script via Docker run:
-
-## Installation / Usages
 
 ### Docker run
 
@@ -41,7 +35,7 @@ docker run -v /PATH/TO/MEDIA/DIR:/media -it --rm ghcr.io/klementng/subtitle-extr
 
 ### Docker compose
 
-Used for watch directory for changes
+Used for watching directory for changes
 
 - see [docker-compose.yml](./docker-compose.yml) for sample configuration
 
