@@ -37,7 +37,7 @@ def styles_select_top(ssafile: SSAFile, **kwargs):
     return [ssafile.styles.get(key)]
 
 
-def styles_action_scale(ssafile: SSAFile, style: SSAStyle, **kwargs):
+def styles_action_scale_margins(ssafile: SSAFile, style: SSAStyle, **kwargs):
 
     y_ratio = float(kwargs["y_new"]) / float(kwargs["y_old"])
     x_ratio = float(kwargs["x_new"]) / float(kwargs["x_old"])
@@ -50,7 +50,23 @@ def styles_action_scale(ssafile: SSAFile, style: SSAStyle, **kwargs):
     return style
 
 
-def events_action_scale(ssafile: SSAFile, event: SSAEvent, **kwargs):
+def events_action_scale_position(ssafile: SSAFile, event: SSAEvent, **kwargs):
+
+    y_ratio = float(kwargs["y_new"]) / float(kwargs["y_old"])
+    x_ratio = float(kwargs["x_new"]) / float(kwargs["x_old"])
+
+    m: re.Match
+    for m in re.finditer(r"\\pos\(([0-9\.]+),([0-9\.]+)\)", str(event.text)):
+        x_pos = float(m.group(1)) * x_ratio
+        y_pos = float(m.group(2)) * y_ratio
+
+        new_pos = f"\\pos({x_pos:.1f},{y_pos:.1f})"
+        event.text = event.text.replace(str(m.group(0)), new_pos)
+
+    return event
+
+
+def events_action_scale_margins(ssafile: SSAFile, event: SSAEvent, **kwargs):
 
     y_ratio = float(kwargs["y_new"]) / float(kwargs["y_old"])
     x_ratio = float(kwargs["x_new"]) / float(kwargs["x_old"])

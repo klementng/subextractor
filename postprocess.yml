@@ -37,7 +37,7 @@ ass:
         - uses: styles_select_all
       actions:
         # Scales Existing font / margins with new player resolution
-        - uses: styles_action_scale
+        - uses: styles_action_scale_margins
           with:
             x_old: "{{outputs['old_info'][0]['PlayResX']}}"
             y_old: "{{outputs['old_info'][0]['PlayResY']}}"
@@ -69,7 +69,14 @@ ass:
         - uses: events_select_all
 
       actions:
-        - uses: events_action_scale
+        - uses: events_action_scale_margins
+          with:
+            x_old: "{{outputs['old_info'][0]['PlayResX']}}"
+            y_old: "{{outputs['old_info'][0]['PlayResY']}}"
+            x_new: "{{outputs['info'][0]['PlayResX']}}"
+            y_new: "{{outputs['info'][0]['PlayResY']}}"
+        
+        - uses: events_action_scale_position
           with:
             x_old: "{{outputs['old_info'][0]['PlayResX']}}"
             y_old: "{{outputs['old_info'][0]['PlayResY']}}"
