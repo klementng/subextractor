@@ -50,6 +50,10 @@ def styles_action_scale_margins(ssafile: SSAFile, style: SSAStyle, **kwargs):
     return style
 
 
+def styles_action_scale(ssafile: SSAFile, style: SSAStyle, **kwargs):
+    return styles_action_scale_margins(ssafile, style, **kwargs)
+
+
 def events_action_scale_position(ssafile: SSAFile, event: SSAEvent, **kwargs):
 
     y_ratio = float(kwargs["y_new"]) / float(kwargs["y_old"])
@@ -75,6 +79,12 @@ def events_action_scale_margins(ssafile: SSAFile, event: SSAEvent, **kwargs):
     event.marginl = round(event.marginl * x_ratio)
     event.marginr = round(event.marginr * x_ratio)
 
+    return event
+
+
+def events_action_scale(ssafile: SSAFile, event: SSAEvent, **kwargs):
+    events_action_scale_margins(ssafile, event, **kwargs)
+    events_action_scale_position(ssafile, event, **kwargs)
     return event
 
 
