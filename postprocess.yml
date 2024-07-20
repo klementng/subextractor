@@ -63,7 +63,7 @@ ass:
             fontsize: 60
             marginl: 30
             marginr: 30
-            marginv: 50
+            marginv: 54 # 5% of 1080p
 
     - selectors:
         - uses: events_select_all

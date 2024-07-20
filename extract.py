@@ -85,7 +85,11 @@ class BaseSubtitleExtractor:
             unknown_language_as if unknown_language_as != None else "unknown"
         )
         self.overwrite = overwrite
-        self._sub_info_cache = cachetools.FIFOCache(128)
+
+        if overwrite is True:
+            self.log.warning("Overwriting of existing subtitle files is set")
+
+        self._ffprobe_cache = cachetools.FIFOCache(128)
 
     @classmethod
     def _run_subprocess(cls, args: list[str]):
@@ -110,13 +114,13 @@ class BaseSubtitleExtractor:
                 c_process.returncode, c_process.stderr, str(c_process.stderr, "utf-8")
             )
             cls.log.critical(err_msg)
+            cls.log.critical(f"ARGS: {' '.join(args)}")
             raise RuntimeError(err_msg)
 
         return c_process
 
-    @staticmethod
-    @cachetools.func.fifo_cache()
-    def _run_ffprobe(path: str) -> dict:
+    @classmethod
+    def _run_ffprobe(cls, path: str) -> dict:
         """Probe a media file and retrieve information about its subtitle streams using ffprobe.
 
         Args:
@@ -174,8 +178,12 @@ class BaseSubtitleExtractor:
             "-v",
             "error",
         ]
-
-        process = BaseSubtitleExtractor._run_subprocess(args)
+        cls.log.debug(f"ffprobe media information at {path}...")
+        try:
+            process = cls._run_subprocess(args)
+        except RuntimeError as e:
+            cls.log.critical(f"ffprobe command failed!")
+            raise
 
         streams_list = json.loads(process.stdout)["streams"]
 
@@ -208,8 +216,8 @@ class BaseSubtitleExtractor:
         try:
             return cls._run_subprocess(ffmpeg + args)
         except RuntimeError as e:
-            cls.log.critical(f"FFmpeg command failed!, args :{ffmpeg + args}")
-            raise e
+            cls.log.critical(f"FFmpeg command failed!")
+            raise
 
     def get_subtitle_info(self, path: str) -> dict:
         """Return subtitle information from ffmpeg. Ensure that 'tags' & ['tags']['language'] keys are set
@@ -221,23 +229,18 @@ class BaseSubtitleExtractor:
             dict: subtitle information
         """
 
-        if path in self._sub_info_cache:
-            self.log.debug("Using cached subtitle info")
-            return self._sub_info_cache[path]
+        # Check if in cache
+        if path in self._ffprobe_cache:
+            return self._ffprobe_cache[path]
 
-        self.log.debug("Probing media file...")
-        try:
-            info = self._run_ffprobe(path)
-        except RuntimeError as e:
-            self.log.critical(f"ffprobe failed: {e}")
-            raise e
+        info = self._run_ffprobe(path)
 
         self.log.debug(f"Found {len(info)} subtitle stream(s)")
         for k in info:
             info[k].setdefault("tags", {})
             info[k]["tags"].setdefault("language", self.unknown_language_as)
 
-        self._sub_info_cache[path] = info
+        self._ffprobe_cache[path] = info
         return info
 
     def is_wanted(
@@ -254,7 +257,6 @@ class BaseSubtitleExtractor:
         Returns:
             bool: True if subtitle needs to be extracted from video file, False to skip extraction.
         """
-        self.log.debug(f"Checking for existing subtitles...")
 
         ffprobe_info = self.get_subtitle_info(video_path)
 
@@ -264,14 +266,14 @@ class BaseSubtitleExtractor:
         if os.path.exists(subtitle_path):
 
             if self.overwrite == True:
-                self.log.warning(
+                self.log.debug(
                     f"Not skipping. --overwrite flag is set (stream:{stream_index})"
                 )
                 return True
 
             elif os.path.getsize(subtitle_path) == 0:
                 os.remove(subtitle_path)
-                self.log.warning(
+                self.log.debug(
                     f"Not skipping. Empty subtitle file found (stream:{stream_index}). Deleted file: {subtitle_path}"
                 )
 
@@ -292,7 +294,7 @@ class BaseSubtitleExtractor:
             return False
 
         elif codecs != [] and sub_codec not in codecs:
-            self.log.critical(
+            self.log.warning(
                 f"Skipping. codec ({sub_codec}) not supported. (stream:{stream_index})"
             )
 
@@ -362,7 +364,7 @@ class BitmapSubtitleExtractor(BaseSubtitleExtractor):
             parent.overwrite,
             parent.unknown_language_as,
         )
-        obj._sub_info_cache = parent._sub_info_cache
+        obj._ffprobe_cache = parent._ffprobe_cache
         return obj
 
     @classmethod
@@ -411,9 +413,10 @@ class BitmapSubtitleExtractor(BaseSubtitleExtractor):
                 f"Unable to do OCR on unknown subtitle language: {ocr_language}"
             )
             raise e
+
         except Exception as e:
             cls.log.critical("OCR Failed..." + str(e))
-            raise RuntimeError(e)
+            raise
 
         finally:
             if os.path.exists(tmp_dir):
@@ -511,7 +514,7 @@ class TextSubtitleExtractor(BaseSubtitleExtractor):
             parent.overwrite,
             parent.unknown_language_as,
         )
-        obj._sub_info_cache = parent._sub_info_cache
+        obj._ffprobe_cache = parent._ffprobe_cache
         return obj
 
     def extract(self, video_path: str, stream_indexes: list) -> list[str]:
@@ -564,6 +567,8 @@ class SubtitleExtractor(BaseSubtitleExtractor):
     ) -> None:
         super().__init__(formats, languages, overwrite, unknown_language_as)
         self.disable_bitmap_extract = disable_bitmap_extract
+        if disable_bitmap_extract is True:
+            self.log.warning("Bitmap based subtitle extraction is disabled")
 
     def extract(self, video_path: str) -> list[str]:
         """Extract text/bitmap based subtitles from a video file .

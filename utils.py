@@ -69,34 +69,20 @@ def get_filelist(path, regex, excluded_files=[]):
     return files
 
 
-def get_subtitles_filelist(path, formats=["srt", "ass", "vtt"], exclude_filepath=None):
+def get_ext_filelist(path, formats=["srt", "ass", "vtt"], exclude_filepath=None):
 
     fom = "|".join(formats)
-    logger.info(f"Searching for subtitles files that end with {fom}")
+    logger.info(f"Searching for files that end with {fom}")
 
     regex = "(?i)\\.({})$".format(fom)
+    excluded_files = []
 
     if exclude_filepath != None:
-        with open(exclude_filepath) as f:
-            excluded_files = f.read().splitlines()
-    else:
-        excluded_files = []
-
-    return get_filelist(path, regex, excluded_files)
-
-
-def get_video_filelist(
-    path, formats=["mkv", "mp4", "webm", "ts", "ogg"], exclude_filepath=None
-):
-    fom = "|".join(formats)
-    logger.info(f"Searching for video {fom} files")
-
-    regex = "(?i)\\.({})$".format(fom)
-
-    if exclude_filepath != None:
-        with open(exclude_filepath) as f:
-            excluded_files = f.read().splitlines()
-    else:
-        excluded_files = []
+        if os.path.exists(exclude_filepath):
+            with open(exclude_filepath) as f:
+                excluded_files = f.read().splitlines()
+        else:
+            with open(exclude_filepath, "w") as f:
+                f.write("")
 
     return get_filelist(path, regex, excluded_files)

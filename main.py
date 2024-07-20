@@ -16,7 +16,7 @@ from utils import *
 
 
 def postprocess_subtitles(files, args, pp_args):
-
+    logger.info("Postprocessing subtitles...")
     postprocesser = postprocessing.SubtitleFormatter(pp_args.postprocessing)
 
     output = run(args.threads, postprocesser.format, files, args.disable_progress_bar)
@@ -30,7 +30,7 @@ def postprocess_subtitles(files, args, pp_args):
 
 
 def extract_subtitles(files, args, vid_args):
-
+    logger.info("Extracting subtitles...")
     extractor = extract.SubtitleExtractor(
         vid_args.output_formats,
         vid_args.languages,
@@ -53,17 +53,15 @@ def extract_subtitles(files, args, vid_args):
 def main(args, vid_args, sub_args):
 
     if args.mode == "extract":
-        files = get_video_filelist(args.path, exclude_filepath=vid_args.exclude_videos)
+        files = get_ext_filelist(args.path, exclude_filepath=vid_args.exclude_videos)
         extract_subtitles(files, args, vid_args)
 
     elif args.mode == "format":
-        files = get_subtitles_filelist(
-            args.path, exclude_filepath=sub_args.exclude_subtitles
-        )
+        files = get_ext_filelist(args.path, exclude_filepath=sub_args.exclude_subtitles)
         postprocess_subtitles(files, args, sub_args)
 
     else:
-        files = get_video_filelist(args.path, exclude_filepath=vid_args.exclude_videos)
+        files = get_ext_filelist(args.path, exclude_filepath=vid_args.exclude_videos)
         output = extract_subtitles(files, args, vid_args)
         postprocess_subtitles(output, args, sub_args)
 
