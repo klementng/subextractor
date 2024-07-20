@@ -86,9 +86,6 @@ class BaseSubtitleExtractor:
         )
         self.overwrite = overwrite
 
-        if overwrite is True:
-            self.log.warning("Overwriting of existing subtitle files is set")
-
         self._ffprobe_cache = cachetools.FIFOCache(128)
 
     @classmethod
@@ -567,8 +564,11 @@ class SubtitleExtractor(BaseSubtitleExtractor):
     ) -> None:
         super().__init__(formats, languages, overwrite, unknown_language_as)
         self.disable_bitmap_extract = disable_bitmap_extract
+
         if disable_bitmap_extract is True:
             self.log.warning("Bitmap based subtitle extraction is disabled")
+        if overwrite is True:
+            self.log.warning("--overwrite is set")
 
     def extract(self, video_path: str) -> list[str]:
         """Extract text/bitmap based subtitles from a video file .

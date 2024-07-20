@@ -12,7 +12,7 @@ import postprocessing
 logger = logging.getLogger(__name__)
 
 
-from utils import *
+from utils import run, get_ext_filelist
 
 
 def postprocess_subtitles(files, args, pp_args):
@@ -52,18 +52,26 @@ def extract_subtitles(files, args, vid_args):
 
 def main(args, vid_args, sub_args):
 
-    if args.mode == "extract":
-        files = get_ext_filelist(args.path, exclude_filepath=vid_args.exclude_videos)
-        extract_subtitles(files, args, vid_args)
-
-    elif args.mode == "format":
-        files = get_ext_filelist(args.path, exclude_filepath=sub_args.exclude_subtitles)
+    if args.mode == "format":
+        files = get_ext_filelist(
+            args.path,
+            ["srt", "ass", "vtt"],
+            exclude_filepath=sub_args.exclude_subtitles,
+        )
         postprocess_subtitles(files, args, sub_args)
 
     else:
-        files = get_ext_filelist(args.path, exclude_filepath=vid_args.exclude_videos)
+        files = get_ext_filelist(
+            args.path,
+            ["mkv", "mp4", "webm", "ts", "ogg"],
+            exclude_filepath=vid_args.exclude_videos,
+        )
         output = extract_subtitles(files, args, vid_args)
-        postprocess_subtitles(output, args, sub_args)
+
+        if args.mode == "extract":
+            return
+        else:
+            postprocess_subtitles(output, args, sub_args)
 
 
 if __name__ == "__main__":

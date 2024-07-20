@@ -69,7 +69,7 @@ def get_filelist(path, regex, excluded_files=[]):
     return files
 
 
-def get_ext_filelist(path, formats=["srt", "ass", "vtt"], exclude_filepath=None):
+def get_ext_filelist(path, formats, exclude_filepath=None):
 
     fom = "|".join(formats)
     logger.info(f"Searching for files that end with {fom}")
