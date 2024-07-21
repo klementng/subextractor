@@ -30,7 +30,7 @@ Once the extraction is complete, the tool runs a postprocessor that edits the su
 Usage via docker run
 
 ```
-docker run -v /PATH/TO/MEDIA/DIR:/media -it --rm ghcr.io/klementng/subtitle-extract:latest full /media [options]
+docker run -u 1000:1000 -v /PATH/TO/MEDIA/DIR:/media -it --rm ghcr.io/klementng/subtitle-extract:latest full /media [options]
 ```
 
 ### Docker compose

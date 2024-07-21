@@ -13,5 +13,6 @@ RUN pip3 install -r requirements.txt
 RUN rm -rf /var/lib/apt/lists/* /var/tmp/*
 
 WORKDIR /app
+USER 1000:1000
 COPY . .
 ENTRYPOINT [ "python3", "/app/main.py" ]
