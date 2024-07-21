@@ -111,9 +111,10 @@ class SubtitleRunner:
             for e_conf in misc:
                 self.run_misc(ssafile, e_conf)
 
-    def format(self, path, save=True):
-        ssafile = pysubs2.load(path)
-
+    def format(self, path, ext=None, save=True):
+        ssafile = pysubs2.load(path, format_=ext)
+        # _format will prevent the auto detection error from rasing in mutliprocessing thread which causes all thread to crash
+        # related = https://stackoverflow.com/questions/70883678/python-multiprocessing-get-hung
         self.run_workflow(ssafile)
 
         if save == True:
@@ -141,7 +142,7 @@ class SubtitleFormatter:
                 runner = SubtitleRunner(self.workflows[ext])
                 self.log.debug(f"Formatting subtitle: {path}")
 
-                runner.format(path, save=save)
+                runner.format(path, ext=ext, save=save)
                 return path
 
         else:
