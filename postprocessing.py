@@ -142,7 +142,10 @@ class SubtitleFormatter:
                 runner = SubtitleRunner(self.workflows[ext])
                 self.log.debug(f"Formatting subtitle: {path}")
 
-                runner.format(path, ext=ext, save=save)
+                try:
+                    runner.format(path, ext=ext, save=save)
+                except pysubs2.FormatAutodetectionError as e:
+                    raise RuntimeError(str(e))
                 return path
 
         else:
