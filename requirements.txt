@@ -1,5 +1,5 @@
 babelfish==0.6.1
-cachetools==5.4.0
+cachetools==5.5.0
 pgsrip==0.1.11
 pysubs2==1.7.2
 PyYAML==6.0.1
