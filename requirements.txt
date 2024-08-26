@@ -4,4 +4,4 @@ pgsrip==0.1.11
 pysubs2==1.7.2
 PyYAML==6.0.1
 tqdm_loggable==0.2
-watchdog==4.0.1
+watchdog==5.0.0
