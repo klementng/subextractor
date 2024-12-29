@@ -2,76 +2,152 @@ import argparse
 import datetime
 import logging
 
+import os
 import time
 from itertools import chain
 
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
 
-import extract
-import postprocessing
 
 logger = logging.getLogger(__name__)
 
 
-from utils import run, get_ext_filelist
+import extract
+import postprocessing
+from extract import SubtitleExtractor
 
+from postprocessing import SubtitleFormatter
 
-def postprocess_subtitles(files, args, pp_args):
-    logger.info("Postprocessing subtitles...")
-    postprocesser = postprocessing.SubtitleFormatter(pp_args.postprocessing)
-
-    output = run(args.threads, postprocesser.format, files, args.disable_progress_bar)
-    output_files = list(chain.from_iterable(output))
-
-    if args.exclude_mode == "e+a" and pp_args.exclude_subtitles != None:
-        with open(pp_args.exclude_subtitles, "a") as f:
-            f.write("\n".join(output_files))
-
-    return output_files
-
-
-def extract_subtitles(files, args, vid_args):
-    logger.info("Extracting subtitles...")
-    extractor = extract.SubtitleExtractor(
-        vid_args.output_formats,
-        vid_args.languages,
-        vid_args.overwrite,
-        vid_args.unknown_language_as,
-        vid_args.disable_bitmap_extraction,
-    )
-
-    output = run(args.threads, extractor.extract, files, args.disable_progress_bar)
-
-    output_files = list(chain.from_iterable(output))
-
-    if args.exclude_mode == "e+a" and vid_args.exclude_videos != None:
-        with open(vid_args.exclude_videos, "a") as f:
-            f.write("\n".join(output_files))
-
-    return output_files
+from utils import (
+    run,
+    get_filelist_with_ext,
+    postprocess_subtitles,
+    extract_subtitles,
+    add_excluded_files,
+)
 
 
 def main(args, vid_args, sub_args):
 
-    if args.mode == "format":
-        files = get_ext_filelist(
-            args.path,
-            ["srt", "ass", "vtt"],
-            exclude_filepath=sub_args.exclude_subtitles,
+    def run_format(files):
+        postprocesser = SubtitleFormatter(sub_args.postprocessing)
+        output_files = postprocess_subtitles(
+            postprocesser, files, args.threads, args.disable_progress_bar
         )
-        postprocess_subtitles(files, args, sub_args)
+
+        if args.exclude_mode == "e+a" and sub_args.exclude_subtitles != None:
+            add_excluded_files(sub_args.exclude_subtitles, output_files)
+
+        return output_files
+
+    def run_extract(files):
+        extractor = SubtitleExtractor(
+            vid_args.output_formats,
+            vid_args.languages,
+            vid_args.overwrite,
+            vid_args.unknown_language_as,
+            vid_args.disable_bitmap_extraction,
+        )
+
+        output_files = extract_subtitles(
+            extractor, files, args.threads, args.disable_progress_bar
+        )
+
+        if args.exclude_mode == "e+a" and vid_args.exclude_videos != None:
+            add_excluded_files(vid_args.exclude_videos, output_files)
+
+        return output_files
+
+    def run(files):
+        if args.mode == "format":
+            return [], run_format(files)
+
+        elif args.mode == "extract":
+            return run_extract(files), []
+        else:
+
+            out = run_extract(files)
+            return out, run_format(out)
+
+    #### Local functions ^^^^
+    if args.scan_interval <= 0 and args.monitor == False:
+        if args.mode == "format":
+            files, excluded = get_filelist_with_ext(
+                args.path,
+                ["mkv", "mp4", "webm", "ts", "ogg"],
+                exclude_filepath=vid_args.exclude_videos,
+            )
+
+        elif args.mode == "extract":
+            files, excluded = get_filelist_with_ext(
+                args.path,
+                ["srt", "ass", "vtt"],
+                exclude_filepath=sub_args.exclude_subtitles,
+            )
+
+        else:
+            files = []
+
+        run(files)
+        return
 
     else:
-        files = get_ext_filelist(
-            args.path,
-            ["mkv", "mp4", "webm", "ts", "ogg"],
-            exclude_filepath=vid_args.exclude_videos,
-        )
-        output = extract_subtitles(files, args, vid_args)
 
-        if args.mode == "extract":
-            return
-        else:
-            postprocess_subtitles(output, args, sub_args)
+        class DirectoryEventHandler(FileSystemEventHandler):
+
+            def on_any_event(self, event):
+
+                if (
+                    event.event_type in ("created", "modified")
+                    and not event.is_directory
+                ):
+                    path = str(event.src_path)
+
+                    if any(
+                        path.endswith(ext)
+                        for ext in ["mkv", "mp4", "webm", "ts", "ogg"]
+                    ):
+                        logger.info(f"Detected change: {path}, running processor")
+                        run([path])
+                    else:
+                        logger.debug(
+                            f"Detected change: {path}, skipping... (not supported file)"
+                        )
+
+        if args.monitor:
+            logger.info(f"Mointoring {os.path.abspath(args.path)} for changes")
+            event_handler = DirectoryEventHandler()
+            observer = Observer()
+            observer.schedule(event_handler, os.path.abspath(args.path), recursive=True)
+            observer.start()
+
+        try:
+            while True:
+
+                if args.scan_interval > 0:
+                    logger.info(
+                        "Running next run on: "
+                        + str(
+                            datetime.datetime.now()
+                            + datetime.timedelta(minutes=args.scan_interval)
+                        )
+                    )
+                    time.sleep(args.scan_interval * 60)
+
+                    files, excluded = get_filelist_with_ext(
+                        args.path,
+                        ["mkv", "mp4", "webm", "ts", "ogg"],
+                        exclude_filepath=vid_args.exclude_videos,
+                    )
+                    run(files)
+                else:
+                    time.sleep(999)
+
+        except KeyboardInterrupt:
+            if args.monitor:
+                observer.stop()
+                observer.join()
 
 
 if __name__ == "__main__":
@@ -86,16 +162,17 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--scan_interval",
-        help="interval to scan folder in mins (set 0 to disable and exit upon completion) ",
+        help="interval to scan folder in mins (set 0 to disable and exit upon completion)",
         type=int,
         default=0,
     )
-    # parser.add_argument(
-    #     "--monitor",
-    #     help="monitor for any new file created",
-    #     default=False,
-    #     action="store_true",
-    # )
+    parser.add_argument(
+        "--monitor",
+        help="monitor for any new file created",
+        default=False,
+        action="store_true",
+    )
+
     parser.add_argument(
         "--disable_progress_bar",
         help="enable progress bar",
@@ -121,11 +198,10 @@ if __name__ == "__main__":
         format="%(asctime)s - %(name)s - %(funcName)s() - %(levelname)s - %(message)s",
         level=args.log_level,
     )
-    if args.log_file != None:
+    if args.log_file is not None:
         logging.getLogger().addHandler(logging.FileHandler(args.log_file))
 
     if args.mode in ["extract", "full"]:
-
         parser_vid = argparse.ArgumentParser(
             description="extract subtitle from video files",
             add_help=True,
@@ -142,7 +218,7 @@ if __name__ == "__main__":
 
         parser_vid.add_argument(
             "--languages",
-            help="extract subtitle for selected languages, use 'all' to extract all languages",
+            help='extract subtitle for selected languages, use "all" to extract all languages',
             nargs="+",
             default=["all"],
         )
@@ -195,16 +271,3 @@ if __name__ == "__main__":
         sub_args, unknown = parser_sub.parse_known_args()
 
     main(args, vid_args, sub_args)
-
-    if args.scan_interval > 0:
-
-        while True:
-            logger.info(
-                "Running next run on: "
-                + str(
-                    datetime.datetime.now()
-                    + datetime.timedelta(minutes=args.scan_interval)
-                )
-            )
-            time.sleep(args.scan_interval * 60)
-            main(args, vid_args, sub_args)

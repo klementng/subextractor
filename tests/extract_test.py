@@ -35,6 +35,7 @@ class TestSubtitleExtractor(unittest.TestCase):
 
     #     self.output_files.extend(files)
 
+
     def tearDown(self) -> None:
         for f in self.output_files:
             os.remove(f)

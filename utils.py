@@ -1,5 +1,6 @@
 import argparse
 import datetime
+import functools
 import glob
 import logging
 import multiprocessing
@@ -8,10 +9,12 @@ import re
 import time
 import traceback
 from itertools import chain
-import functools
 
 from tqdm_loggable.auto import tqdm
 from tqdm_loggable.tqdm_logging import tqdm_logging
+
+import extract
+import postprocessing
 
 logger = logging.getLogger(__name__)
 
@@ -52,6 +55,34 @@ def run(threads, function, files, disable_progress_bar=False):
         return output
 
 
+def postprocess_subtitles(
+    postprocesser: postprocessing.SubtitleFormatter,
+    files,
+    threads=4,
+    disable_progress_bar=False,
+):
+    logger.info("Postprocessing subtitles...")
+
+    output = run(threads, postprocesser.format, files, disable_progress_bar)
+    output_files = list(chain.from_iterable(output))
+
+    return output_files
+
+
+def extract_subtitles(
+    extractor: extract.SubtitleExtractor,
+    files,
+    threads=4,
+    disable_progress_bar=False,
+):
+    logger.info("Extracting subtitles...")
+
+    output = run(threads, extractor.extract, files, disable_progress_bar)
+    output_files = list(chain.from_iterable(output))
+
+    return output_files
+
+
 def get_filelist(path, regex, excluded_files=[]):
     files = []
 
@@ -69,20 +100,43 @@ def get_filelist(path, regex, excluded_files=[]):
     return files
 
 
-def get_ext_filelist(path, formats, exclude_filepath=None):
+def get_excluded_files(exclude_filepath: str) -> set:
+    excluded_files = set()
+
+    if exclude_filepath != None:
+        if os.path.exists(exclude_filepath):
+            with open(exclude_filepath) as f:
+                excluded_files = set(f.read().splitlines())
+    else:
+        with open(exclude_filepath, "w") as f:
+            f.write("")
+
+    return excluded_files
+
+
+def add_excluded_files(exclude_filepath: str, new_data: set | list) -> set:
+    excluded_files = get_excluded_files(exclude_filepath)
+    new = set(new_data)
+
+    combined = excluded_files.union(new)
+
+    with open(exclude_filepath, "a") as f:
+        f.write("\n".join(combined))
+
+    return combined
+
+
+def get_filelist_with_ext(
+    path: str, formats: list[str], exclude_filepath: str | None = None
+):
 
     fom = "|".join(formats)
     logger.info(f"Searching for files that end with {fom}")
 
     regex = "(?i)\\.({})$".format(fom)
-    excluded_files = []
 
-    if exclude_filepath != None:
-        if os.path.exists(exclude_filepath):
-            with open(exclude_filepath) as f:
-                excluded_files = f.read().splitlines()
-        else:
-            with open(exclude_filepath, "w") as f:
-                f.write("")
+    excluded_files = set()
+    if exclude_filepath is not None:
+        excluded_files = get_excluded_files(exclude_filepath)
 
-    return get_filelist(path, regex, excluded_files)
+    return get_filelist(path, regex, excluded_files), excluded_files
