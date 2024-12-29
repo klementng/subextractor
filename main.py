@@ -116,6 +116,7 @@ def main(args, vid_args, sub_args):
                         )
 
         if args.monitor:
+            logger.info(f"Mointoring {os.path.abspath(args.path)} for changes")
             event_handler = DirectoryEventHandler()
             observer = Observer()
             observer.schedule(event_handler, os.path.abspath(args.path), recursive=True)
