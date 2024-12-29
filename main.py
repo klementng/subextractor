@@ -111,7 +111,7 @@ def main(args, vid_args, sub_args):
                         logger.info(f"Detected change: {path}, running processor")
                         run([path])
                     else:
-                        logger.info(
+                        logger.debug(
                             f"Detected change: {path}, skipping... (not supported file)"
                         )
 
