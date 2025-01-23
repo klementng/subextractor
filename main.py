@@ -95,7 +95,7 @@ def main(args, vid_args, sub_args):
 
     else:
 
-        task_queue = queue.Queue()
+        task_queue = queue.SimpleQueue()
 
         class DirectoryEventHandler(FileSystemEventHandler):
 
@@ -111,7 +111,7 @@ def main(args, vid_args, sub_args):
                         path.endswith(ext)
                         for ext in ["mkv", "mp4", "webm", "ts", "ogg"]
                     ):
-                        logger.info(f"Detected change: {path}, running processor")
+                        logger.info(f"Detected change: {path}, adding to queue")
                         task_queue.put(path)
                     else:
                         logger.debug(
@@ -125,21 +125,29 @@ def main(args, vid_args, sub_args):
             observer.schedule(event_handler, os.path.abspath(args.path), recursive=True)
             observer.start()
 
+        next_run = datetime.datetime.now() + datetime.timedelta(
+            minutes=args.scan_interval * 60
+        )
+
         try:
             while True:
+
                 if not task_queue.empty():
-                    run([task_queue.get()])
+                    items = []
 
-                elif args.scan_interval > 0:
-                    logger.info(
-                        "Running next run on: "
-                        + str(
-                            datetime.datetime.now()
-                            + datetime.timedelta(minutes=args.scan_interval)
-                        )
-                    )
-                    time.sleep(args.scan_interval * 60)
+                    try:
+                        for i in range(task_queue.qsize()):
+                            i = task_queue.get(block=False)
+                            if i not in items:
+                                items.append(i)
+                    except:
+                        pass
 
+                    logger.info(f"Processing queue items: {len(items)}...")
+                    run(items)
+
+                elif args.scan_interval > 0 and datetime.datetime.now() > next_run:
+                    logger.info("Processing interval scan...")
                     files, excluded = get_filelist_with_ext(
                         args.path,
                         ["mkv", "mp4", "webm", "ts", "ogg"],
@@ -147,8 +155,13 @@ def main(args, vid_args, sub_args):
                     )
                     run(files)
 
+                    next_run = datetime.datetime.now() + datetime.timedelta(
+                        minutes=args.scan_interval * 60
+                    )
+                    logger.info("Running next run on: " + str(next_run))
+
                 else:
-                    time.sleep(30)
+                    time.sleep(5)
 
         except KeyboardInterrupt:
             if args.monitor:
