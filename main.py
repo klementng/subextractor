@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 import extract
+import queue
 import postprocessing
 from extract import SubtitleExtractor
 
@@ -94,6 +95,8 @@ def main(args, vid_args, sub_args):
 
     else:
 
+        task_queue = queue.Queue()
+
         class DirectoryEventHandler(FileSystemEventHandler):
 
             def on_any_event(self, event):
@@ -109,7 +112,7 @@ def main(args, vid_args, sub_args):
                         for ext in ["mkv", "mp4", "webm", "ts", "ogg"]
                     ):
                         logger.info(f"Detected change: {path}, running processor")
-                        run([path])
+                        task_queue.put(path)
                     else:
                         logger.debug(
                             f"Detected change: {path}, skipping... (not supported file)"
@@ -124,8 +127,10 @@ def main(args, vid_args, sub_args):
 
         try:
             while True:
+                if not task_queue.empty():
+                    run([task_queue.get()])
 
-                if args.scan_interval > 0:
+                elif args.scan_interval > 0:
                     logger.info(
                         "Running next run on: "
                         + str(
@@ -141,8 +146,9 @@ def main(args, vid_args, sub_args):
                         exclude_filepath=vid_args.exclude_videos,
                     )
                     run(files)
+
                 else:
-                    time.sleep(999)
+                    time.sleep(30)
 
         except KeyboardInterrupt:
             if args.monitor:
