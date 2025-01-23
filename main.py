@@ -177,7 +177,7 @@ if __name__ == "__main__":
     parser.add_argument("path", help="path to media file/folder", default="/media")
 
     parser.add_argument(
-        "--threads", help="set number of running threads", type=int, default=4
+        "--threads", help="set number of running threads", type=int, default=1
     )
     parser.add_argument(
         "--scan_interval",
