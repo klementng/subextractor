@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 import extract
+import queue
 import postprocessing
 from extract import SubtitleExtractor
 
@@ -94,6 +95,8 @@ def main(args, vid_args, sub_args):
 
     else:
 
+        task_queue = queue.SimpleQueue()
+
         class DirectoryEventHandler(FileSystemEventHandler):
 
             def on_any_event(self, event):
@@ -108,8 +111,8 @@ def main(args, vid_args, sub_args):
                         path.endswith(ext)
                         for ext in ["mkv", "mp4", "webm", "ts", "ogg"]
                     ):
-                        logger.info(f"Detected change: {path}, running processor")
-                        run([path])
+                        logger.info(f"Detected change: {path}, adding to queue")
+                        task_queue.put(path)
                     else:
                         logger.debug(
                             f"Detected change: {path}, skipping... (not supported file)"
@@ -122,27 +125,43 @@ def main(args, vid_args, sub_args):
             observer.schedule(event_handler, os.path.abspath(args.path), recursive=True)
             observer.start()
 
+        next_run = datetime.datetime.now() + datetime.timedelta(
+            minutes=args.scan_interval * 60
+        )
+
         try:
             while True:
 
-                if args.scan_interval > 0:
-                    logger.info(
-                        "Running next run on: "
-                        + str(
-                            datetime.datetime.now()
-                            + datetime.timedelta(minutes=args.scan_interval)
-                        )
-                    )
-                    time.sleep(args.scan_interval * 60)
+                if not task_queue.empty():
+                    items = []
 
+                    try:
+                        for i in range(task_queue.qsize()):
+                            i = task_queue.get(block=False)
+                            if i not in items:
+                                items.append(i)
+                    except:
+                        pass
+
+                    logger.info(f"Processing queue items: {len(items)}...")
+                    run(items)
+
+                elif args.scan_interval > 0 and datetime.datetime.now() > next_run:
+                    logger.info("Processing interval scan...")
                     files, excluded = get_filelist_with_ext(
                         args.path,
                         ["mkv", "mp4", "webm", "ts", "ogg"],
                         exclude_filepath=vid_args.exclude_videos,
                     )
                     run(files)
+
+                    next_run = datetime.datetime.now() + datetime.timedelta(
+                        minutes=args.scan_interval * 60
+                    )
+                    logger.info("Running next run on: " + str(next_run))
+
                 else:
-                    time.sleep(999)
+                    time.sleep(5)
 
         except KeyboardInterrupt:
             if args.monitor:
@@ -158,7 +177,7 @@ if __name__ == "__main__":
     parser.add_argument("path", help="path to media file/folder", default="/media")
 
     parser.add_argument(
-        "--threads", help="set number of running threads", type=int, default=4
+        "--threads", help="set number of running threads", type=int, default=1
     )
     parser.add_argument(
         "--scan_interval",
