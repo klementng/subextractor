@@ -4,6 +4,13 @@ import re
 import os
 
 import extract
+import extract.config
+import extract.media
+
+
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
 
 
 class TestSubtitleExtractor(unittest.TestCase):
@@ -12,9 +19,10 @@ class TestSubtitleExtractor(unittest.TestCase):
         super().__init__(methodName)
 
     def test_text_extract(self):
-        extractor = extract.SubtitleExtractor(
-            formats=["ass", "srt", "vtt"], overwrite=True
-        )
+
+        config = extract.config.ExtractorConfig(True, ["vtt", "srt", "ass"])
+        probe = extract.media.MediaProber()
+        extractor = extract.TextSubtitleExtractor(config, probe)
 
         files = extractor.extract("tests/samples/text.mkv")
         self.assertEqual(len(files), 3 * 8)
@@ -24,17 +32,21 @@ class TestSubtitleExtractor(unittest.TestCase):
 
         self.output_files.extend(files)
 
-    # def test_bitmap_extract(self):
-    #     extractor = extract.SubtitleExtractor(formats=['ass','srt','vtt'], overwrite=True)
+    def test_bitmap_extract(self):
 
-    #     files = extractor.extract("tests/samples/bitmap.mkv")
-    #     self.assertEqual(len(files), 3)
+        config = extract.config.ExtractorConfig(
+            True, ["vtt", "srt", "ass"], unknown_language_as="eng"
+        )
+        probe = extract.media.MediaProber()
+        extractor = extract.BitmapSubtitleExtractor(config, probe)
 
-    #     for f in files:
-    #         self.assertGreater(os.path.getsize(f), 0)
+        files = extractor.extract("tests/samples/bitmap.mkv")
+        self.assertEqual(len(files), 4)
 
-    #     self.output_files.extend(files)
+        for f in files:
+            self.assertGreater(os.path.getsize(f), 0)
 
+        self.output_files.extend(files)
 
     def tearDown(self) -> None:
         for f in self.output_files:
