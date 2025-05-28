@@ -2,7 +2,7 @@ import os
 import re
 from pathlib import Path
 
-from .media import StreamInfo
+from .prober import StreamInfo
 
 
 class SubtitlePath:

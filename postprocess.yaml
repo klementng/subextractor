@@ -47,7 +47,7 @@
 #   - Return appropriate data types based on function type:
 #     * Selectors: return list[obj] (list of selected objects)
 #     * Filters: return list[obj] (filtered list of objects)
-#     * Actions: return None or any value to be saved with 'id'
+#     * Actions: return list[obj] or any value to be saved with 'id'
 #     * Misc: return None or any value to be saved with 'id'
 #
 #
@@ -102,8 +102,8 @@ ass:
           id: info
           with:
             ScaledBorderAndShadow: "yes"
-            PlayResX: 1920
-            PlayResY: 1080
+            PlayResX: "1920"
+            PlayResY: "1080"
 
     #### Modify styling information ####
     - selectors:
@@ -128,14 +128,24 @@ ass:
       actions:
         - uses: styles_action_update_properties
           with:
-            fontname: "Arial"
+            fontname: Arial
+            fontsize: 48
+            primarycolour: "&H00FFFFFF" # White, fully opaque
+            outlinecolour: "&H00000000" # Black
+            backcolour: "&H64000000" # Semi-transparent shadow
+            bold: 0
+            italic: 0
             borderstyle: 1
-            outline: 1
+            outline: 2
             shadow: 1
-            fontsize: 60
+            alignment: 2
             marginl: 30
             marginr: 30
-            marginv: 54 # 5% of 1080p
+            marginv: 40
+            scale_x: 100
+            scale_y: 100
+            spacing: 0
+            encoding: 1
 
     - selectors:
         - uses: events_select_all

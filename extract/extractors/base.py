@@ -8,8 +8,8 @@ from abc import ABC, abstractmethod
 from extract.subprocess import SubprocessRunner
 
 from ..config import ExtractorConfig
-from ..media import MediaProber, StreamInfo
 from ..path import SubtitlePath
+from ..prober import MediaProber, StreamInfo
 
 logger = logging.getLogger(__name__)
 

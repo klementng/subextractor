@@ -1,21 +1,21 @@
-import unittest
 import os
 import tempfile
-import yaml
+import unittest
 from pathlib import Path
+
 import pysubs2
+import yaml
+
 from postprocessing import SubtitleFormatter
 
 
 class TestSubtitlePostprocessing(unittest.TestCase):
     def __init__(self, methodName: str = "runTest") -> None:
         self.output_files = []
-        self.temp_dir = None
+        self.temp_dir = tempfile.mkdtemp()
         super().__init__(methodName)
 
     def setUp(self) -> None:
-        # Create temporary directory
-        self.temp_dir = tempfile.mkdtemp()
 
         # Create test config
         config_data = {
@@ -64,8 +64,8 @@ class TestSubtitlePostprocessing(unittest.TestCase):
         ssafile = pysubs2.SSAFile()
 
         # Set original properties
-        ssafile.info["PlayResX"] = 1280
-        ssafile.info["PlayResY"] = 720
+        ssafile.info["PlayResX"] = "1280"
+        ssafile.info["PlayResY"] = "720"
         ssafile.info["Title"] = "Original Title"
 
         # Add test events
@@ -171,8 +171,8 @@ class TestSubtitlePostprocessing(unittest.TestCase):
         test_file = Path(self.temp_dir) / "scaling_test.ass"
         ssafile = pysubs2.SSAFile()
 
-        ssafile.info["PlayResX"] = 1280
-        ssafile.info["PlayResY"] = 720
+        ssafile.info["PlayResX"] = "1280"
+        ssafile.info["PlayResY"] = "720"
 
         # Add style
         style = pysubs2.SSAStyle()
@@ -199,8 +199,8 @@ class TestSubtitlePostprocessing(unittest.TestCase):
         test_file = Path(self.temp_dir) / "info_test.ass"
         ssafile = pysubs2.SSAFile()
 
-        ssafile.info["PlayResX"] = 1280
-        ssafile.info["PlayResY"] = 720
+        ssafile.info["PlayResX"] = "1280"
+        ssafile.info["PlayResY"] = "720"
         ssafile.info["Title"] = "Original"
 
         ssafile.save(str(test_file))

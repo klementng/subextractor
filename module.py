@@ -1,12 +1,17 @@
-from extract.config import ExtractorConfig
-from extract.media import MediaProber
-from dataclasses import dataclass
 import glob
 import logging
 import os
 import re
 from abc import ABC, abstractmethod
-from extract import TextSubtitleExtractor, BitmapSubtitleExtractor
+from dataclasses import dataclass
+
+from extract import (
+    BitmapSubtitleExtractor,
+    TextSubtitleExtractor,
+    ExtractorConfig,
+    MediaProber,
+)
+
 from postprocessing import SubtitleFormatter
 
 logger = logging.getLogger(__name__)
@@ -15,21 +20,26 @@ logger = logging.getLogger(__name__)
 class Module(ABC):
     def __init__(
         self,
-        excluded_filelist: str | None = None,
+        excluded_enable: bool = False,
+        excluded_filelist: str = "",
         excluded_append: bool = True,
         **kwargs,
     ) -> None:
 
+        self.excluded_enable = excluded_enable
         self.excluded_filelist = excluded_filelist
         self.excluded_append = excluded_append
 
     def add_excluded_files(self, paths: list[str]):
+        if self.excluded_enable == False:
+            return set()
+
         if self.excluded_append and self.excluded_filelist:
             with open(self.excluded_filelist, "a") as f:
                 f.write("\n".join(paths))
 
     def get_excluded_files(self) -> set:
-        if not self.excluded_filelist:
+        if self.excluded_enable == False or not self.excluded_filelist:
             return set()
 
         if not os.path.exists(self.excluded_filelist):

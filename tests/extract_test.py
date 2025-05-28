@@ -1,14 +1,10 @@
-import unittest
-import glob
-import re
+import logging
 import os
+import unittest
 
 import extract
 import extract.config
-import extract.media
-
-
-import logging
+import extract.prober
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -21,7 +17,7 @@ class TestSubtitleExtractor(unittest.TestCase):
     def test_text_extract(self):
 
         config = extract.config.ExtractorConfig(True, ["vtt", "srt", "ass"])
-        probe = extract.media.MediaProber()
+        probe = extract.prober.MediaProber()
         extractor = extract.TextSubtitleExtractor(config, probe)
 
         files = extractor.extract("tests/samples/text.mkv")
@@ -37,7 +33,7 @@ class TestSubtitleExtractor(unittest.TestCase):
         config = extract.config.ExtractorConfig(
             True, ["vtt", "srt", "ass"], unknown_language_as="eng"
         )
-        probe = extract.media.MediaProber()
+        probe = extract.prober.MediaProber()
         extractor = extract.BitmapSubtitleExtractor(config, probe)
 
         files = extractor.extract("tests/samples/bitmap.mkv")

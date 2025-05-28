@@ -2,10 +2,9 @@
 Subprocess execution with proper error handling.
 """
 
-import logging
-import signal
-import subprocess
 import atexit
+import logging
+import subprocess
 
 logger = logging.getLogger(__name__)
 

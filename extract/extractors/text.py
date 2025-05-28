@@ -3,12 +3,11 @@ Text-based subtitle extractor using FFmpeg.
 """
 
 import logging
-from typing import List
 
 from ..constants import FFMPEG_TEXT_FORMATS
 from ..exceptions import FFmpegError
-from ..media import StreamInfo
 from ..path import SubtitlePath
+from ..prober import StreamInfo
 from .base import BaseExtractor
 
 logger = logging.getLogger(__name__)

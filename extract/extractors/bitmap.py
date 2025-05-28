@@ -12,8 +12,8 @@ from pgsrip import Options, Sup, pgsrip
 
 from ..constants import FFMPEG_BITMAP_FORMATS
 from ..exceptions import FFmpegError, OCRError
-from ..media import StreamInfo
 from ..path import SubtitlePath
+from ..prober import StreamInfo
 from .base import BaseExtractor
 
 logger = logging.getLogger(__name__)
