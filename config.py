@@ -70,7 +70,7 @@ def parse_args():
     parser.add_argument(
         "--extractor-config-overwrite",
         action="store_true",
-        default=True,
+        default=False,
         help="Overwrite extractor config (default: true)",
     )
     parser.add_argument(
@@ -101,8 +101,8 @@ def parse_args():
     # Postprocessor settings
     parser.add_argument(
         "--postprocessor-exclude-enable",
-        type=str,
-        default="./postprocessed.txt",
+        action="store_true",
+        default=False,
         help="Postprocessor exclude enable (default: ./postprocessed.txt)",
     )
     parser.add_argument(
