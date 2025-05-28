@@ -129,19 +129,19 @@ ass:
         - uses: styles_action_update_properties
           with:
             fontname: Arial
-            fontsize: 48
-            primarycolour: "&H00FFFFFF" # White, fully opaque
-            outlinecolour: "&H00000000" # Black
-            backcolour: "&H64000000" # Semi-transparent shadow
+            fontsize: 60
+            primarycolour: "&H00FFFFFF" # while
+            outlinecolour: "&H00444444" # dark gray
+            backcolour: "&H50000000"
             bold: 0
             italic: 0
             borderstyle: 1
-            outline: 2
+            outline: 1
             shadow: 1
             alignment: 2
             marginl: 30
             marginr: 30
-            marginv: 40
+            marginv: 60
             scale_x: 100
             scale_y: 100
             spacing: 0

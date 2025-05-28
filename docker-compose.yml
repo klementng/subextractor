@@ -2,33 +2,31 @@ services:
     subextractor:
         image: ghcr.io/klementng/subextractor:latest
         container_name: subextractor
+        
         user: 1000:1000
         environment:
             - TZ=Etc/UTC
-    
-            - APP_WATCH=true
-            - APP_SCAN_INTERVAL=10
-
-            - APP_ENABLED_EXTRACTOR=true
-            - APP_ENABLED_POSTPROCESSOR=true
-
-            - EXTRACTOR_EXCLUDE_ENBALE=false
-            - EXTRACTOR_EXCLUDE_FILE=./extracted.txt
-            - EXTRACTOR_EXCLUDE_APPEND=false
-    
-            - EXTRACTOR_EXTRACT_BITMAP=false
-
-            - EXTRACTOR_CONFIG_OVERWRITE=true
-            - EXTRACTOR_CONFIG_DESIRED_FORMATS=srt,ass
-            - EXTRACTOR_CONFIG_LANGUAGES=all
-            - EXTRACTOR_CONFIG_UNKNOWN_LANGUAGE_AS=eng
-            
-            - POSTPROCESSOR_EXCLUDE_ENBALE=false
-            - POSTPROCESSOR_EXCLUDE_FILE=./postprocessed.txt
-            - POSTPROCESSOR_EXCLUDE_APPEND=false
-
-            - POSTPROCESSOR_CONFIG_WORKFLOW_FILE=postprocess.yaml
+        
         volumes:
             - /path/to/media:/media
-        command: /media --log_level INFO
+
+        command: >
+            /media 
+            --log-level INFO
+            --app-watch
+            --app-scan-interval 10
+            --app-enabled-extractor
+            --app-enabled-postprocessor
+            --extractor-exclude-file ./extracted.txt
+            --extractor-exclude-append
+            --extractor-extract-bitmap
+            --extractor-config-overwrite
+            --extractor-config-desired-formats srt,ass
+            --extractor-config-languages all
+            --extractor-config-unknown-language-as eng
+            --postprocessor-exclude-enable ./postprocessed.txt
+            --postprocessor-exclude-file ./postprocessed.txt
+            --postprocessor-exclude-append
+            --postprocessor-config-workflow-file postprocess.yaml
+        
         restart: unless-stopped

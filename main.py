@@ -10,7 +10,6 @@ import time
 from watchdog.events import DirCreatedEvent, FileCreatedEvent, FileSystemEventHandler
 from watchdog.observers import Observer
 
-import config
 from extract.constants import SUPPORTED_VIDEO_EXTENSION
 from module import ExtractionModule, PostprocessorModule
 
@@ -106,23 +105,19 @@ def main(mainpath: str):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(add_help=False)
-    parser.add_argument("path", help="Path to media file/folder", default="/media")
-    parser.add_argument("--log_level", help="Logging level", default="INFO")
-    parser.add_argument("--log_file", help="Path to log file", default=None)
-
-    args = parser.parse_args()
+    import config
 
     logging.basicConfig(
         format="%(asctime)s - %(name)s - %(funcName)s() - %(levelname)s - %(message)s",
-        level=args.log_level.upper(),
+        level=config.LOG_LEVEL,
     )
-    if args.log_file is not None:
-        logging.getLogger().addHandler(logging.FileHandler(args.log_file))
+
+    if config.LOG_FILE:
+        logging.getLogger().addHandler(logging.FileHandler(config.LOG_FILE))
 
     signal.signal(signal.SIGTERM, lambda x, y: sys.exit(0))
 
     try:
-        main(args.path)
+        main(config.PATH)
     except KeyboardInterrupt:
         sys.exit(0)
