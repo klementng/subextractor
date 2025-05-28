@@ -44,15 +44,14 @@ Used for watching directory for changes
   <summary>Show options</summary>
 
 ```sh
-usage: main.py [-h] [--app-watch] [--app-scan-interval APP_SCAN_INTERVAL] [--app-enabled-extractor] [--no-app-enabled-extractor]
-               [--app-enabled-postprocessor] [--no-app-enabled-postprocessor] [--extractor-exclude-enable]
-               [--extractor-exclude-file EXTRACTOR_EXCLUDE_FILE] [--extractor-exclude-append] [--extractor-extract-bitmap]
-               [--extractor-config-overwrite] [--no-extractor-config-overwrite]
+usage: main.py [-h] [--app-watch] [--app-scan-interval APP_SCAN_INTERVAL] [--app-enabled-extractor] [--no-app-enabled-extractor] [--app-enabled-postprocessor]
+               [--no-app-enabled-postprocessor] [--extractor-exclude-enable] [--extractor-exclude-file EXTRACTOR_EXCLUDE_FILE] [--extractor-exclude-append]
+               [--extractor-extract-bitmap] [--extractor-config-overwrite] [--no-extractor-config-overwrite]
                [--extractor-config-desired-formats EXTRACTOR_CONFIG_DESIRED_FORMATS [EXTRACTOR_CONFIG_DESIRED_FORMATS ...]]
                [--extractor-config-languages EXTRACTOR_CONFIG_LANGUAGES [EXTRACTOR_CONFIG_LANGUAGES ...]]
-               [--extractor-config-unknown-language-as EXTRACTOR_CONFIG_UNKNOWN_LANGUAGE_AS]
-               [--postprocessor-exclude-enable POSTPROCESSOR_EXCLUDE_ENABLE] [--postprocessor-exclude-file POSTPROCESSOR_EXCLUDE_FILE]
-               [--postprocessor-exclude-append] [--postprocessor-config-workflow-file POSTPROCESSOR_CONFIG_WORKFLOW_FILE]
+               [--extractor-config-unknown-language-as EXTRACTOR_CONFIG_UNKNOWN_LANGUAGE_AS] [--postprocessor-exclude-enable]
+               [--postprocessor-exclude-file POSTPROCESSOR_EXCLUDE_FILE] [--postprocessor-exclude-append]
+               [--postprocessor-config-workflow-file POSTPROCESSOR_CONFIG_WORKFLOW_FILE]
 
 Application configuration
 
@@ -87,8 +86,8 @@ options:
                         List of languages (default: all)
   --extractor-config-unknown-language-as EXTRACTOR_CONFIG_UNKNOWN_LANGUAGE_AS
                         Unknown language fallback (default: eng)
-  --postprocessor-exclude-enable POSTPROCESSOR_EXCLUDE_ENABLE
-                        Postprocessor exclude enable (default: ./postprocessed.txt)
+  --postprocessor-exclude-enable
+                        Postprocessor exclude enable (default: false)
   --postprocessor-exclude-file POSTPROCESSOR_EXCLUDE_FILE
                         Postprocessor exclude file path (default: ./postprocessed.txt)
   --postprocessor-exclude-append
