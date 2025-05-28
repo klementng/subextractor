@@ -129,7 +129,7 @@ ass:
         - uses: styles_action_update_properties
           with:
             fontname: Arial
-            fontsize: 60
+            fontsize: 48
             primarycolour: "&H00FFFFFF" # while
             outlinecolour: "&H00444444" # dark gray
             backcolour: "&H50000000"
