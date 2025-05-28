@@ -111,7 +111,7 @@ def parse_args():
         "--postprocessor-exclude-enable",
         action="store_true",
         default=False,
-        help="Postprocessor exclude enable (default: ./postprocessed.txt)",
+        help="Postprocessor exclude enable (default: False)",
     )
     parser.add_argument(
         "--postprocessor-exclude-file",

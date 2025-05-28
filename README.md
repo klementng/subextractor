@@ -44,19 +44,26 @@ Used for watching directory for changes
   <summary>Show options</summary>
 
 ```sh
-usage: main.py [-h] [--app-watch] [--app-scan-interval APP_SCAN_INTERVAL] [--app-enabled-extractor] [--no-app-enabled-extractor] [--app-enabled-postprocessor]
-               [--no-app-enabled-postprocessor] [--extractor-exclude-enable] [--extractor-exclude-file EXTRACTOR_EXCLUDE_FILE] [--extractor-exclude-append]
-               [--extractor-extract-bitmap] [--extractor-config-overwrite] [--no-extractor-config-overwrite]
+usage: main.py [-h] [--log_level LOG_LEVEL] [--log_file LOG_FILE] [--app-watch] [--app-scan-interval APP_SCAN_INTERVAL] [--app-enabled-extractor] [--no-app-enabled-extractor]
+               [--app-enabled-postprocessor] [--no-app-enabled-postprocessor] [--extractor-exclude-enable] [--extractor-exclude-file EXTRACTOR_EXCLUDE_FILE]
+               [--extractor-exclude-append] [--extractor-extract-bitmap] [--extractor-config-overwrite] [--no-extractor-config-overwrite]
                [--extractor-config-desired-formats EXTRACTOR_CONFIG_DESIRED_FORMATS [EXTRACTOR_CONFIG_DESIRED_FORMATS ...]]
                [--extractor-config-languages EXTRACTOR_CONFIG_LANGUAGES [EXTRACTOR_CONFIG_LANGUAGES ...]]
                [--extractor-config-unknown-language-as EXTRACTOR_CONFIG_UNKNOWN_LANGUAGE_AS] [--postprocessor-exclude-enable]
                [--postprocessor-exclude-file POSTPROCESSOR_EXCLUDE_FILE] [--postprocessor-exclude-append]
                [--postprocessor-config-workflow-file POSTPROCESSOR_CONFIG_WORKFLOW_FILE]
+               path
 
 Application configuration
 
+positional arguments:
+  path                  Path to media file/folder
+
 options:
   -h, --help            show this help message and exit
+  --log_level LOG_LEVEL
+                        Logging level (default: INFO)
+  --log_file LOG_FILE   Path to log file (default: None)
   --app-watch           Enable app watch mode (default: false)
   --app-scan-interval APP_SCAN_INTERVAL
                         App scan interval in seconds (default: 0)
