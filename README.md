@@ -61,9 +61,9 @@ positional arguments:
 
 options:
   -h, --help            show this help message and exit
-  --log_level LOG_LEVEL
+  --log-level LOG_LEVEL
                         Logging level (default: INFO)
-  --log_file LOG_FILE   Path to log file (default: None)
+  --log-file LOG_FILE   Path to log file (default: None)
   --app-watch           Enable app watch mode (default: false)
   --app-scan-interval APP_SCAN_INTERVAL
                         App scan interval in seconds (default: 0)
