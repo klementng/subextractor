@@ -3,6 +3,9 @@
 
 # Subtitle Extract
 
+> [!WARNING]  
+> Breaking changes from V1 to V2, see new arguments below 
+
 ## About The Project
 
 This Python script extracts both text and image-based subtitles from media files and saves them as .ass, .srt, or .vtt subtitle files. Additionally, it includes a customizable post-processor that standardizes the styling of .ass subtitles while retaining their original positioning.
@@ -91,26 +94,20 @@ Format / postprocessing of subtitles options:
 
 <details>
   <summary>Show options</summary>
-usage: main.py [-h] [--log_level LOG_LEVEL] [--log_file LOG_FILE] [--app-watch] [--app-scan-interval APP_SCAN_INTERVAL] [--app-enabled-extractor]
-               [--no-app-enabled-extractor] [--app-enabled-postprocessor] [--no-app-enabled-postprocessor] [--extractor-exclude-enable]
+usage: main.py [-h] [--app-watch] [--app-scan-interval APP_SCAN_INTERVAL] [--app-enabled-extractor] [--no-app-enabled-extractor]
+               [--app-enabled-postprocessor] [--no-app-enabled-postprocessor] [--extractor-exclude-enable]
                [--extractor-exclude-file EXTRACTOR_EXCLUDE_FILE] [--extractor-exclude-append] [--extractor-extract-bitmap]
                [--extractor-config-overwrite] [--no-extractor-config-overwrite]
-               [--extractor-config-desired-formats EXTRACTOR_CONFIG_DESIRED_FORMATS] [--extractor-config-languages EXTRACTOR_CONFIG_LANGUAGES]
+               [--extractor-config-desired-formats EXTRACTOR_CONFIG_DESIRED_FORMATS [EXTRACTOR_CONFIG_DESIRED_FORMATS ...]]
+               [--extractor-config-languages EXTRACTOR_CONFIG_LANGUAGES [EXTRACTOR_CONFIG_LANGUAGES ...]]
                [--extractor-config-unknown-language-as EXTRACTOR_CONFIG_UNKNOWN_LANGUAGE_AS]
                [--postprocessor-exclude-enable POSTPROCESSOR_EXCLUDE_ENABLE] [--postprocessor-exclude-file POSTPROCESSOR_EXCLUDE_FILE]
                [--postprocessor-exclude-append] [--postprocessor-config-workflow-file POSTPROCESSOR_CONFIG_WORKFLOW_FILE]
-               path
 
 Application configuration
 
-positional arguments:
-  path                  Path to media file/folder
-
 options:
   -h, --help            show this help message and exit
-  --log_level LOG_LEVEL
-                        Logging level (default: INFO)
-  --log_file LOG_FILE   Path to log file (default: None)
   --app-watch           Enable app watch mode (default: false)
   --app-scan-interval APP_SCAN_INTERVAL
                         App scan interval in seconds (default: 0)
@@ -134,10 +131,10 @@ options:
                         Overwrite extractor config (default: true)
   --no-extractor-config-overwrite
                         Don't overwrite extractor config
-  --extractor-config-desired-formats EXTRACTOR_CONFIG_DESIRED_FORMATS
-                        Comma-separated list of desired formats (default: srt,ass)
-  --extractor-config-languages EXTRACTOR_CONFIG_LANGUAGES
-                        Comma-separated list of languages (default: all)
+  --extractor-config-desired-formats EXTRACTOR_CONFIG_DESIRED_FORMATS [EXTRACTOR_CONFIG_DESIRED_FORMATS ...]
+                        List of desired formats (default: srt ass)
+  --extractor-config-languages EXTRACTOR_CONFIG_LANGUAGES [EXTRACTOR_CONFIG_LANGUAGES ...]
+                        List of languages (default: all)
   --extractor-config-unknown-language-as EXTRACTOR_CONFIG_UNKNOWN_LANGUAGE_AS
                         Unknown language fallback (default: eng)
   --postprocessor-exclude-enable POSTPROCESSOR_EXCLUDE_ENABLE

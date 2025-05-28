@@ -1,28 +1,8 @@
 import argparse
 
 
-def convert_to_bool(value):
-    if isinstance(value, bool):
-        return value
-    return str(value).lower() in ("true", "t", "1", "yes", "on")
-
-
-def get_list(value):
-    if isinstance(value, list):
-        return value
-    return [v.strip() for v in str(value).split(",") if v.strip()]
-
-
 def parse_args():
     parser = argparse.ArgumentParser(description="Application configuration")
-
-    parser.add_argument("path", help="Path to media file/folder", default="/media")
-    parser.add_argument(
-        "--log_level", help="Logging level (default: INFO)", default="INFO"
-    )
-    parser.add_argument(
-        "--log_file", help="Path to log file (default: None)", default=None
-    )
 
     # App settings
     parser.add_argument(
@@ -101,15 +81,15 @@ def parse_args():
     )
     parser.add_argument(
         "--extractor-config-desired-formats",
-        type=str,
-        default="srt,ass",
-        help="Comma-separated list of desired formats (default: srt,ass)",
+        nargs="+",
+        default=["srt", "ass"],
+        help="List of desired formats (default: srt ass)",
     )
     parser.add_argument(
         "--extractor-config-languages",
-        type=str,
-        default="all",
-        help="Comma-separated list of languages (default: all)",
+        nargs="+",
+        default=["all"],
+        help="List of languages (default: all)",
     )
     parser.add_argument(
         "--extractor-config-unknown-language-as",
@@ -146,12 +126,7 @@ def parse_args():
 
     args = parser.parse_args()
 
-    # Convert list arguments
-    args.extractor_config_desired_formats = get_list(
-        args.extractor_config_desired_formats
-    )
-    args.extractor_config_languages = get_list(args.extractor_config_languages)
-
+    # No need to convert list arguments since they're already lists
     return args
 
 

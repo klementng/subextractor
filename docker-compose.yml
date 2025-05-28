@@ -2,14 +2,11 @@ services:
     subextractor:
         image: ghcr.io/klementng/subextractor:latest
         container_name: subextractor
-        
         user: 1000:1000
         environment:
             - TZ=Etc/UTC
-        
         volumes:
             - /path/to/media:/media
-
         command: >
             /media 
             --log-level INFO
@@ -21,12 +18,12 @@ services:
             --extractor-exclude-append
             --extractor-extract-bitmap
             --extractor-config-overwrite
-            --extractor-config-desired-formats srt,ass
+            --extractor-config-desired-formats srt ass
             --extractor-config-languages all
             --extractor-config-unknown-language-as eng
             --postprocessor-exclude-enable ./postprocessed.txt
             --postprocessor-exclude-file ./postprocessed.txt
             --postprocessor-exclude-append
             --postprocessor-config-workflow-file postprocess.yaml
-        
+            
         restart: unless-stopped
