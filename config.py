@@ -6,10 +6,10 @@ def parse_args():
 
     parser.add_argument("path", help="Path to media file/folder", default="/media")
     parser.add_argument(
-        "--log_level", help="Logging level (default: INFO)", default="INFO"
+        "--log-level", help="Logging level (default: INFO)", default="INFO"
     )
     parser.add_argument(
-        "--log_file", help="Path to log file (default: None)", default=None
+        "--log-file", help="Path to log file (default: None)", default=None
     )
 
     # App settings
