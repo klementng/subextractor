@@ -1,0 +1,192 @@
+# ============================================================================
+# WORKFLOW STRUCTURE AND EXECUTION ORDER
+# ============================================================================
+#
+# Each task executes in the following order:
+#   1) SELECTORS: Select objects from the subtitle file to be processed
+#      - Function signature: func(ssafile, **kwargs) -> list[obj]
+#      - Purpose: Choose which elements (info, styles, events) to work with
+#
+#   2) FILTERS: Filter selected objects based on criteria
+#      - Function signature: func(ssafile, items, **kwargs) -> list[obj]
+#      - Purpose: Narrow down the selection based on conditions
+#
+#   3) ACTIONS: Execute modifications on filtered objects
+#      - Function signature: func(ssafile, items, **kwargs) -> None
+#      - Purpose: Apply changes to the selected and filtered objects
+#
+#   4) MISC: Run miscellaneous operations on the entire subtitle file
+#      - Function signature: func(ssafile, **kwargs) -> None
+#      - Purpose: Perform file-level operations that don't target specific objects
+#
+# ============================================================================
+# OUTPUT STORAGE AND TEMPLATE VARIABLES
+# ============================================================================
+#
+# SAVING OUTPUTS:
+#   - Adding an 'id' field to any selector or action saves its output to a
+#     dictionary accessible via template variables
+#   - Example: id: old_info
+#
+# ACCESSING SAVED DATA:
+#   - Use template syntax: {{outputs['id'][index]['property']}}
+#   - Example: {{int(outputs['old_info'][0]['PlayResX']) * 2}}
+#
+# ============================================================================
+# CUSTOM USER ACTIONS
+# ============================================================================
+#
+# CREATING CUSTOM FUNCTIONS:
+#   - You can create your own custom functions by replacing the file at 'postprocess/user_actions.py'
+#   - The workflow system will automatically import and use functions from user_actions.py
+#   - Custom functions will take precedence over built-in actions if they have the same name
+#
+# CUSTOM FUNCTION REQUIREMENTS:
+#   - All functions must accept 'ssafile' as the first parameter
+#   - Additional parameters should be accepted via **kwargs
+#   - Return appropriate data types based on function type:
+#     * Selectors: return list[obj] (list of selected objects)
+#     * Filters: return list[obj] (filtered list of objects)
+#     * Actions: return list[obj] or any value to be saved with 'id'
+#     * Misc: return None or any value to be saved with 'id'
+#
+#
+# ============================================================================
+# AVAILABLE BUILT-IN FUNCTIONS
+# ============================================================================
+#
+# INFO SELECTORS:
+#   - info_select_current_info: Select current subtitle file info
+#
+# INFO ACTIONS:
+#   - info_action_update: Update subtitle file information properties
+#
+# STYLE SELECTORS:
+#   - styles_select_all: Select all styles in the subtitle file
+#   - styles_select_top: Select the most frequently used style
+#
+# STYLE ACTIONS:
+#   - styles_action_scale_margins: Scale font size and margins based on resolution
+#   - styles_action_update_properties: Update style properties (font, colors, etc.)
+#   - styles_remove: Remove selected styles from the file
+#
+# EVENT SELECTORS:
+#   - events_select_all: Select all subtitle events/lines
+#
+# EVENT FILTERS:
+#   - events_filter_regex: Filter events matching a regex pattern
+#   - events_filter_properties: Filter events by properties (is_comment, is_drawing)
+#
+# EVENT ACTIONS:
+#   - events_action_scale_position: Scale \pos() tags for resolution changes
+#   - events_action_scale_margins: Scale event-level margins
+#   - events_action_scale: Scale both margins and positions
+#   - events_action_regex_substitution: Replace text using regex
+#   - events_action_delete: Remove selected events
+#   - events_action_update_properties: Update event properties
+#
+# MISC ACTIONS:
+#   - events_misc_remove_miscellaneous_events: Remove SSA file misc events
+#
+# ============================================================================
+
+ass:
+  tasks:
+    - selectors:
+        - uses: info_select_current_info # only one item
+          id: old_info # Save the original info immediately when selected
+
+      actions:
+        # update info for ssafile and save the current reference to outputs['info']
+        - uses: info_action_update
+          id: info
+          with:
+            ScaledBorderAndShadow: "yes"
+            PlayResX: "1920"
+            PlayResY: "1080"
+
+    #### Modify styling information ####
+    - selectors:
+        - uses: styles_select_all # select all the styles ssafile
+      actions:
+        # Scales Existing font / margins with new player resolution
+        - uses: styles_action_scale_margins
+          with:
+            x_old: "{{int(outputs['old_info'][0]['PlayResX'])}}"
+            y_old: "{{int(outputs['old_info'][0]['PlayResY'])}}"
+            x_new: "{{int(outputs['info'][0]['PlayResX'])}}"
+            y_new: "{{int(outputs['info'][0]['PlayResY'])}}"
+
+        #  Force all font to use arial format
+        - uses: styles_action_update_properties
+          with:
+            fontname: "Arial"
+
+    #  Select the main style (i.e. most used style) and give the following styling format
+    - selectors:
+        - uses: styles_select_top
+      actions:
+        - uses: styles_action_update_properties
+          with:
+            fontname: Arial
+            fontsize: 60
+            primarycolour: "&H00FFFFFF" # while
+            outlinecolour: "&H00444444" # dark gray
+            backcolour: "&H50000000"
+            bold: 0
+            italic: 0
+            borderstyle: 1
+            outline: 1
+            shadow: 1
+            alignment: 2
+            marginl: 30
+            marginr: 30
+            marginv: 60
+            scale_x: 100
+            scale_y: 100
+            spacing: 0
+            encoding: 1
+
+    - selectors:
+        - uses: events_select_all
+
+      actions:
+        # Scales Existing inline margins with new player resolution
+        - uses: events_action_scale_margins
+          with:
+            x_old: "{{int(outputs['old_info'][0]['PlayResX'])}}"
+            y_old: "{{int(outputs['old_info'][0]['PlayResY'])}}"
+            x_new: "{{int(outputs['info'][0]['PlayResX'])}}"
+            y_new: "{{int(outputs['info'][0]['PlayResY'])}}"
+
+        # Scales text position with new resolution
+        - uses: events_action_scale_position
+          with:
+            x_old: "{{int(outputs['old_info'][0]['PlayResX'])}}"
+            y_old: "{{int(outputs['old_info'][0]['PlayResY'])}}"
+            x_new: "{{int(outputs['info'][0]['PlayResX'])}}"
+            y_new: "{{int(outputs['info'][0]['PlayResY'])}}"
+
+    # run ssafile.remove_miscellaneous_events()
+    - misc:
+        - uses: "events_misc_remove_miscellaneous_events"
+
+srt:
+  tasks:
+    - selectors:
+        - uses: events_select_all
+
+      filters:
+        - uses: "events_filter_regex"
+          with:
+            regex: ".*"
+
+      # replace positioning tags left behind by FFMPEG when extracting/converting subtitles
+      actions:
+        - uses: "events_action_regex_substitution"
+          with:
+            regex: '{\\an\d}'
+            replace: "[+] "
+
+    - misc:
+        - uses: "events_misc_remove_miscellaneous_events"

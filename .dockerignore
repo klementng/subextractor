@@ -1,2 +1,4 @@
 .conda/
 .git/
+.env
+.env.sample

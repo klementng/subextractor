@@ -1,23 +1,29 @@
 services:
-    subtitle-extract:
-        image: ghcr.io/klementng/subtitle-extract:latest
-        container_name: subtitle-extract
+    subextractor:
+        image: ghcr.io/klementng/subextractor:latest
+        container_name: subextractor
         user: 1000:1000
         environment:
             - TZ=Etc/UTC
         volumes:
             - /path/to/media:/media
-        command: >- 
-            full /media  
-            --log_level INFO 
-            --scan_interval 30
-            --exclude_mode e+a
-
-            --output_formats srt ass 
-            --languages eng
-            --exclude_videos /config/exclude-video.txt
+        command: >
+            /media 
+            --log-level INFO
+            --app-watch
+            --app-scan-interval 10
+            --app-enabled-extractor
+            --app-enabled-postprocessor
+            --extractor-exclude-file ./extracted.txt
+            --extractor-exclude-append
+            --extractor-extract-bitmap
+            --extractor-config-overwrite
+            --extractor-config-desired-formats srt ass
+            --extractor-config-languages all
+            --extractor-config-unknown-language-as eng
+            --postprocessor-exclude-enable ./postprocessed.txt
+            --postprocessor-exclude-file ./postprocessed.txt
+            --postprocessor-exclude-append
+            --postprocessor-config-workflow-file postprocess.yaml
             
-            --postprocessing ./postprocess.yml 
-            --exclude_subtitles /config/exclude-subtitles.txt 
-        
         restart: unless-stopped

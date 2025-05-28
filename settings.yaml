@@ -1,0 +1,26 @@
+app:
+  watch: true
+  scan_interval: 10
+
+  enabled:
+    extractor: true
+    postprocessor: true
+
+extractor:
+  excluded_filelist: ./extracted.txt
+  excluded_append: false
+
+  extract_bitmap: False
+
+  config:
+    overwrite: true
+    desired_formats: ["srt", "ass"]
+    languages: ["all"]
+    unknown_language_as: "eng"
+
+postprocessor:
+  excluded_filelist: ./postprocessed.txt
+  excluded_append: false
+
+  config:
+    workflow_file: "postprocess.yaml"
