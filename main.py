@@ -49,7 +49,7 @@ def main(mainpath: str):
 
     post_mod = PostprocessorModule.from_dict(
         {
-            "excluded_enable": config.EXTRACTOR_EXCLUDE_ENABLE,
+            "excluded_enable": config.POSTPROCESSOR_EXCLUDE_ENABLE,
             "excluded_filelist": config.POSTPROCESSOR_EXCLUDE_FILE,
             "excluded_append": config.POSTPROCESSOR_EXCLUDE_APPEND,
             "config": {"workflow_file": config.POSTPROCESSOR_CONFIG_WORKFLOW_FILE},
