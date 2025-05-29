@@ -94,6 +94,7 @@ class SubtitleFormatter:
 
     def _load_config(self, path) -> dict[str, list[dict]]:
         """Load and parse the YAML configuration file."""
+        logger.info(f"Loading postprocesssing file from: {path}")
         try:
             with open(path, "r", encoding="utf-8") as f:
                 config = yaml.safe_load(f)
