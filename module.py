@@ -1,4 +1,3 @@
-import glob
 import logging
 import os
 import re
@@ -63,9 +62,11 @@ class Module(ABC):
         files = []
 
         if os.path.isdir(path):
-            for f in glob.iglob(os.path.join(path, "**", "**"), recursive=True):
-                if re.search(regex, f) and f not in excluded_files:
-                    files.append(f)
+            for root, dirs, filenames in os.walk(path):
+                for filename in filenames:
+                    f = os.path.join(root, filename)
+                    if re.search(regex, f) and f not in excluded_files:
+                        files.append(f)
         else:
             files = [path]
 
