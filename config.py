@@ -22,7 +22,7 @@ def parse_args():
         "--app-scan-interval",
         type=int,
         default=0,
-        help="App scan interval in seconds (default: 0)",
+        help="App scan interval in mins (default: 0), 0=disabled",
     )
     parser.add_argument(
         "--app-enabled-extractor",

@@ -66,7 +66,7 @@ options:
   --log-file LOG_FILE   Path to log file (default: None)
   --app-watch           Enable app watch mode (default: false)
   --app-scan-interval APP_SCAN_INTERVAL
-                        App scan interval in seconds (default: 0)
+                        App scan interval in mins (default: 0), 0=disabled
   --app-enabled-extractor
                         Enable extractor (default: true)
   --no-app-enabled-extractor

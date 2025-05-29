@@ -82,7 +82,7 @@ def main(mainpath: str):
         observer.start()
 
     next_run = datetime.datetime.now() + datetime.timedelta(
-        minutes=config.APP_SCAN_INTERVAL * 60
+        minutes=config.APP_SCAN_INTERVAL
     )
 
     try:
@@ -95,6 +95,11 @@ def main(mainpath: str):
                 run(p)
             elif config.APP_SCAN_INTERVAL > 0 and datetime.datetime.now() > next_run:
                 run(mainpath)
+
+                next_run = datetime.datetime.now() + datetime.timedelta(
+                    minutes=config.APP_SCAN_INTERVAL
+                )
+
                 logger.info("Running next run on: " + str(next_run))
             else:
                 time.sleep(5)
