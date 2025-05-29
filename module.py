@@ -107,7 +107,10 @@ class ExtractionModule(Module):
         for path in filepaths:
             try:
                 output_files += extractor1.extract(path)
-                output_files += extractor2.extract(path)
+
+                if self.extract_bitmap:
+                    output_files += extractor2.extract(path)
+
             except Exception as e:
                 logger.critical(f"An error has occuerd while extracting: {e}")
 
