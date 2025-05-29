@@ -43,7 +43,7 @@ Used for watching directory for changes
 <details>
   <summary>Show options</summary>
 
-```sh
+```plain
 usage: main.py [-h] [--log-level LOG_LEVEL] [--log-file LOG_FILE] [--app-watch] [--app-scan-interval APP_SCAN_INTERVAL] [--app-enabled-extractor] [--no-app-enabled-extractor]
                [--app-enabled-postprocessor] [--no-app-enabled-postprocessor] [--extractor-exclude-enable] [--extractor-exclude-file EXTRACTOR_EXCLUDE_FILE]
                [--extractor-exclude-append] [--extractor-extract-bitmap] [--extractor-config-overwrite] [--no-extractor-config-overwrite]
@@ -85,8 +85,6 @@ options:
                         Extract bitmap (default: false)
   --extractor-config-overwrite
                         Overwrite existing subtitle file during extraction (default: False)
-  --no-extractor-config-overwrite
-                        Don't overwrite extractor config
   --extractor-config-desired-formats EXTRACTOR_CONFIG_DESIRED_FORMATS [EXTRACTOR_CONFIG_DESIRED_FORMATS ...]
                         List of desired formats (default: srt ass)
   --extractor-config-languages EXTRACTOR_CONFIG_LANGUAGES [EXTRACTOR_CONFIG_LANGUAGES ...]
