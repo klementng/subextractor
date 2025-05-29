@@ -44,7 +44,7 @@ Used for watching directory for changes
   <summary>Show options</summary>
 
 ```sh
-usage: main.py [-h] [--log_level LOG_LEVEL] [--log_file LOG_FILE] [--app-watch] [--app-scan-interval APP_SCAN_INTERVAL] [--app-enabled-extractor] [--no-app-enabled-extractor]
+usage: main.py [-h] [--log-level LOG_LEVEL] [--log-file LOG_FILE] [--app-watch] [--app-scan-interval APP_SCAN_INTERVAL] [--app-enabled-extractor] [--no-app-enabled-extractor]
                [--app-enabled-postprocessor] [--no-app-enabled-postprocessor] [--extractor-exclude-enable] [--extractor-exclude-file EXTRACTOR_EXCLUDE_FILE]
                [--extractor-exclude-append] [--extractor-extract-bitmap] [--extractor-config-overwrite] [--no-extractor-config-overwrite]
                [--extractor-config-desired-formats EXTRACTOR_CONFIG_DESIRED_FORMATS [EXTRACTOR_CONFIG_DESIRED_FORMATS ...]]
@@ -84,7 +84,7 @@ options:
   --extractor-extract-bitmap
                         Extract bitmap (default: false)
   --extractor-config-overwrite
-                        Overwrite extractor config (default: true)
+                        Overwrite existing subtitle file during extraction (default: False)
   --no-extractor-config-overwrite
                         Don't overwrite extractor config
   --extractor-config-desired-formats EXTRACTOR_CONFIG_DESIRED_FORMATS [EXTRACTOR_CONFIG_DESIRED_FORMATS ...]
@@ -94,7 +94,7 @@ options:
   --extractor-config-unknown-language-as EXTRACTOR_CONFIG_UNKNOWN_LANGUAGE_AS
                         Unknown language fallback (default: eng)
   --postprocessor-exclude-enable
-                        Postprocessor exclude enable (default: false)
+                        Postprocessor exclude enable (default: False)
   --postprocessor-exclude-file POSTPROCESSOR_EXCLUDE_FILE
                         Postprocessor exclude file path (default: ./postprocessed.txt)
   --postprocessor-exclude-append

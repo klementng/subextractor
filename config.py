@@ -12,7 +12,6 @@ def parse_args():
         "--log-file", help="Path to log file (default: None)", default=None
     )
 
-    # App settings
     parser.add_argument(
         "--app-watch",
         action="store_true",
@@ -79,7 +78,7 @@ def parse_args():
         "--extractor-config-overwrite",
         action="store_true",
         default=False,
-        help="Overwrite extractor config (default: true)",
+        help="Overwrite existing subtitle file during extraction (default: False)",
     )
     parser.add_argument(
         "--no-extractor-config-overwrite",
@@ -134,7 +133,6 @@ def parse_args():
 
     args = parser.parse_args()
 
-    # No need to convert list arguments since they're already lists
     return args
 
 
