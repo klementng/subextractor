@@ -80,12 +80,7 @@ def parse_args():
         default=False,
         help="Overwrite existing subtitle file during extraction (default: False)",
     )
-    parser.add_argument(
-        "--no-extractor-config-overwrite",
-        dest="extractor_config_overwrite",
-        action="store_false",
-        help="Don't overwrite extractor config",
-    )
+    
     parser.add_argument(
         "--extractor-config-desired-formats",
         nargs="+",
