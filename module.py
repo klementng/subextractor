@@ -3,15 +3,13 @@ import logging
 import os
 import re
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 
 from extract import (
     BitmapSubtitleExtractor,
-    TextSubtitleExtractor,
     ExtractorConfig,
     MediaProber,
+    TextSubtitleExtractor,
 )
-
 from postprocessing import SubtitleFormatter
 
 logger = logging.getLogger(__name__)
@@ -30,42 +28,51 @@ class Module(ABC):
         self.excluded_filelist = excluded_filelist
         self.excluded_append = excluded_append
 
+        if excluded_enable:
+            if not excluded_append and not os.path.exists(excluded_filelist):
+                raise ValueError(
+                    "excluded_enable is enabled while excluded_append is disabled but no filelist is provided"
+                )
+
+            else:
+                # test if the path can be writeable/readable
+                with open(self.excluded_filelist, "a") as f:
+                    pass
+
+    @property
+    def should_add_excluded(self):
+        return self.excluded_enable and self.excluded_append
+
     def add_excluded_files(self, paths: list[str]):
+        logger.info(f"Adding {len(paths)} files to excluded")
+
+        with open(self.excluded_filelist, "a") as f:
+            f.write("\n".join(paths))
+
+    def get_excluded_files(self) -> set[str]:
         if self.excluded_enable == False:
-            return set()
-
-        if self.excluded_append and self.excluded_filelist:
-            with open(self.excluded_filelist, "a") as f:
-                f.write("\n".join(paths))
-
-    def get_excluded_files(self) -> set:
-        if self.excluded_enable == False or not self.excluded_filelist:
-            return set()
-
-        if not os.path.exists(self.excluded_filelist):
-            logger.warning("No excluded file! File not found!")
             return set()
 
         with open(self.excluded_filelist) as f:
             return set(f.read().splitlines())
 
-    def get_filelist(self, path):
+    def get_filelist(self, path) -> list[str]:
         extensions = "|".join(self.get_file_extensions())
         regex = f"(?i)\\.({extensions})$"
         excluded_files = self.get_excluded_files()
-        files = set()
+        files = []
 
         if os.path.isdir(path):
             for f in glob.iglob(os.path.join(path, "**", "**"), recursive=True):
                 if re.search(regex, f) and f not in excluded_files:
-                    files.add(f)
+                    files.append(f)
         else:
-            files = {path}
+            files = [path]
 
         logger.info(
             f"Found {len(files)} files to be processed, {len(excluded_files)} excluded"
         )
-        return list(files)
+        return files
 
     @abstractmethod
     def get_file_extensions(self) -> list[str]:
@@ -114,8 +121,10 @@ class ExtractionModule(Module):
             except Exception as e:
                 logger.critical(f"An error has occuerd while extracting: {e}")
 
-        if self.excluded_append:
+        if self.should_add_excluded:
             self.add_excluded_files(filepaths)
+        else:
+            logger.debug("No adding excluded files")
 
         return output_files
 
@@ -148,7 +157,9 @@ class PostprocessorModule(Module):
             except Exception as e:
                 logger.critical(f"An error has occuerd while formatting: {e}")
 
-        if self.excluded_append:
-            self.add_excluded_files(output_files)
+        if self.should_add_excluded:
+            self.add_excluded_files(filepaths)
+        else:
+            logger.debug("No adding excluded files")
 
         return output_files
