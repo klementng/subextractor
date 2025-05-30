@@ -79,8 +79,15 @@ class BitmapSubtitleExtractor(BaseExtractor):
                 sup_files.append(sup_path)
 
         if ffmpeg_args:
-            self._run_ffmpeg_extraction(video_path, ffmpeg_args)
-            logger.debug(f"Extracted {len(sup_files)} PGS files")
+            try:
+                self._run_ffmpeg_extraction(video_path, ffmpeg_args)
+                logger.debug(f"Extracted {len(sup_files)} PGS files")
+            except:
+                for p in sup_files:
+                    if os.path.exists(p) and os.path.getsize(p) == 0:
+                        os.remove(p)
+
+                raise
 
         return sup_files
 

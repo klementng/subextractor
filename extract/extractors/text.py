@@ -3,6 +3,7 @@ Text-based subtitle extractor using FFmpeg.
 """
 
 import logging
+import os
 
 from ..constants import FFMPEG_TEXT_FORMATS
 from ..exceptions import FFmpegError
@@ -56,10 +57,18 @@ class TextSubtitleExtractor(BaseExtractor):
                     ffmpeg_args.extend(["-map", f"0:{stream.index}", output_path])
                     output_paths.append(output_path)
 
-        # Execute FFmpeg if we have work to do
         if ffmpeg_args:
-            self._run_ffmpeg_extraction(video_path, ffmpeg_args)
-            logger.info(f"Extracted {len(output_paths)} text-based subtitle files")
+            try:
+                self._run_ffmpeg_extraction(video_path, ffmpeg_args)
+                logger.info(f"Extracted {len(output_paths)} text-based subtitle files")
+            except:
+
+                for p in output_path:
+                    if os.path.exists(p) and os.path.getsize(p) == 0:
+                        os.remove(p)
+
+                raise
+
         else:
             logger.info("No text-based subtitles to extract")
 
