@@ -9,6 +9,7 @@ from ..exceptions import FFmpegError
 from ..path import SubtitlePath
 from ..prober import StreamInfo
 from .base import BaseExtractor
+from ..subprocess import SubprocessError
 
 logger = logging.getLogger(__name__)
 
@@ -80,5 +81,5 @@ class TextSubtitleExtractor(BaseExtractor):
         try:
             result = self.subprocess_runner.run(full_args)
             logger.debug("FFmpeg extraction completed successfully")
-        except Exception as e:
+        except SubprocessError as e:
             raise FFmpegError(f"Text subtitle extraction failed: {e}")

@@ -15,7 +15,8 @@ running_subprocesses: list[subprocess.Popen] = []
 @atexit.register
 def cleanup(*args, **kwargs):
     for proc in running_subprocesses:
-        proc.terminate()
+        if proc.poll() == None:
+            proc.terminate()
 
 
 class SubprocessError(Exception):
@@ -40,7 +41,7 @@ class SubprocessRunner:
             ProcessResult object
 
         Raises:
-            CalledProcessError: If process fails and check=True
+            SubprocessError: If process fails and check=True
         """
         logger.debug(f"Running command: {' '.join(args)}")
 
@@ -86,4 +87,8 @@ class SubprocessRunner:
 
         finally:
             if process is not None:
+
+                if process.poll() == None:
+                    process.terminate()
+
                 running_subprocesses.remove(process)
