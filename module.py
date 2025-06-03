@@ -47,6 +47,7 @@ class Module(ABC):
 
         with open(self.excluded_filelist, "a") as f:
             f.write("\n".join(paths))
+            f.write("\n")
 
     def get_excluded_files(self) -> set[str]:
         if self.excluded_enable == False:
