@@ -43,6 +43,9 @@ class Module(ABC):
         return self.excluded_enable and self.excluded_append
 
     def add_excluded_files(self, paths: list[str]):
+        if len(paths) == 0:
+            return
+
         logger.info(f"Adding {len(paths)} files to excluded")
 
         with open(self.excluded_filelist, "a") as f:
