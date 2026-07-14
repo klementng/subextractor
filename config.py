@@ -84,16 +84,10 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--extractor-config-extract-sdh",
-        action="store_true",
-        default=True,
-        help="Extract sdh (default: true) (this flag does nothing)",
-    )
-
-    parser.add_argument(
         "--extractor-config-extract-disable-sdh",
-        dest="extractor-config-extract-sdh",
+        dest="extractor_config_extract_sdh",
         action="store_false",
+        default=True,
         help="Disable sdh subtitles extraction",
     )
 

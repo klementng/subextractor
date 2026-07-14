@@ -5,7 +5,10 @@ Configuration management for subtitle extraction.
 import logging
 from dataclasses import dataclass
 
-from extract.prober import StreamInfo
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from extract.prober import StreamInfo
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +25,7 @@ class ExtractorConfig:
     unknown_language_as: str = "unknown"
     extract_sdh: bool = True
 
-    def is_stream_wanted(self, stream: StreamInfo) -> bool:
+    def is_stream_wanted(self, stream: "StreamInfo") -> bool:
 
         if self.extract_sdh == False and stream.is_sdh():
             logger.debug(f"Skipping unwanted SDH stream ({stream.index})")
