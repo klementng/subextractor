@@ -63,10 +63,8 @@ class BaseExtractor(ABC):
                 return False
             logger.debug(f"Overwriting existing file: {output_path}")
 
-        if not self.config.is_language_wanted(stream.language):
-            logger.debug(
-                f"Skipping unwanted language '{stream.language}' for stream {stream.index}"
-            )
+        if not self.config.is_stream_wanted(stream):
+            logger.debug(f"Skipping unwanted stream {stream.index}")
             return False
 
         # Check codec support
