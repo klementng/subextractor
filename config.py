@@ -82,6 +82,15 @@ def parse_args():
         default=False,
         help="Extract bitmap (default: false)",
     )
+
+    parser.add_argument(
+        "--extractor-config-extract-disable-sdh",
+        dest="extractor_config_extract_sdh",
+        action="store_false",
+        default=True,
+        help="Disable sdh subtitles extraction",
+    )
+
     parser.add_argument(
         "--extractor-config-overwrite",
         action="store_true",
@@ -162,6 +171,7 @@ EXTRACTOR_EXCLUDE_ENABLE = config.extractor_exclude_enable
 EXTRACTOR_EXCLUDE_FILE = config.extractor_exclude_file
 EXTRACTOR_EXCLUDE_APPEND = config.extractor_exclude_append
 EXTRACTOR_EXTRACT_BITMAP = config.extractor_extract_bitmap
+EXTRACTOR_CONFIG_EXTRACT_SDH = config.extractor_config_extract_sdh
 EXTRACTOR_CONFIG_OVERWRITE = config.extractor_config_overwrite
 EXTRACTOR_CONFIG_DESIRED_FORMATS = config.extractor_config_desired_formats
 EXTRACTOR_CONFIG_LANGUAGES = config.extractor_config_languages

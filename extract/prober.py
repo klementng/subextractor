@@ -14,6 +14,25 @@ from .subprocess import SubprocessRunner
 logger = logging.getLogger(__name__)
 
 
+# {
+#   "streams": [
+#     {
+#       "index": 2,
+#       "codec_name": "subrip",
+#       "codec_type": "subtitle",
+#       "disposition": {
+#         "hearing_impaired": 1,
+#         "default": 0,
+#         "forced": 0
+#       },
+#       "tags": {
+#         "language": "eng"
+#       }
+#     }
+#   ]
+# }
+
+
 class StreamInfo:
     """Represents information about a subtitle stream."""
 
@@ -22,7 +41,9 @@ class StreamInfo:
         self.index = stream_data.get("index")
         self.codec_name = stream_data.get("codec_name")
         self.codec_type = stream_data.get("codec_type")
-        self.data.setdefault("tags", {})
+
+        self.data["tags"] = stream_data.get("tags") or {}
+        self.data["disposition"] = stream_data.get("disposition") or {}
 
     @property
     def language(self) -> str:
@@ -40,6 +61,9 @@ class StreamInfo:
     @property
     def disposition(self) -> dict[str, int]:
         return self.data.get("disposition", {})
+
+    def is_sdh(self) -> bool:
+        return bool(self.disposition.get("hearing_impaired", 0))
 
     def is_forced(self) -> bool:
         return bool(self.disposition.get("forced", 0))

@@ -43,6 +43,7 @@ def main(mainpath: str):
                 "desired_formats": config.EXTRACTOR_CONFIG_DESIRED_FORMATS,
                 "languages": config.EXTRACTOR_CONFIG_LANGUAGES,
                 "unknown_language_as": config.EXTRACTOR_CONFIG_UNKNOWN_LANGUAGE_AS,
+                "extract_sdh": config.EXTRACTOR_CONFIG_EXTRACT_SDH,
             },
         }
     )
